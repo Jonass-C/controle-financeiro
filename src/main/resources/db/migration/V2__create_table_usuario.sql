@@ -1,0 +1,6 @@
+CREATE TABLE usuario (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    identificador_login VARCHAR(255) NOT NULL UNIQUE,
+    hash_senha VARCHAR(64) NOT NULL,
+    salt VARCHAR(32) NOT NULL
+);
