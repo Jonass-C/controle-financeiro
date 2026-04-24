@@ -1,0 +1,12 @@
+# Força o Git a usar LF
+* text=auto eol=lf
+
+# Garante que arquivos sigam o padrão Unix
+*.java text eol=lf
+*.xml text eol=lf
+*.properties text eol=lf
+*.sql text eol=lf
+
+# Executáveis de inicialização do Maven (Windows vs Unix)
+*.cmd text eol=crlf
+/mvnw text eol=lf
