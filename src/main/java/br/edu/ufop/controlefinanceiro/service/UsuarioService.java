@@ -16,11 +16,11 @@ public class UsuarioService {
 
     public void cadastrarUsuario(String identificadorLogin, String senhaPura, String confirmacaoSenha) {
         if (!senhaPura.equals(confirmacaoSenha)) {
-            throw new RegraDeNegocioException("Erro: senhas incorretas.");
+            throw new RegraDeNegocioException("As senhas não coincidem.");
         }
 
         if (usuarioRepository.existsByIdentificadorLogin(identificadorLogin)) {
-            throw new RegraDeNegocioException("Erro: já existe um usuário com esse identificador.");
+            throw new RegraDeNegocioException("Já existe um usuário com esse identificador.");
         }
 
         String salt = cryptoService.gerarSalt();
@@ -37,11 +37,11 @@ public class UsuarioService {
 
     public Usuario autenticarUsuario(String identificadorLogin, String senhaPura) {
         Usuario usuario = usuarioRepository.findByIdentificadorLogin(identificadorLogin)
-                .orElseThrow(() -> new RegraDeNegocioException("Erro: identificador ou senhas incorretos."));
+                .orElseThrow(() -> new RegraDeNegocioException("Identificador ou senha incorretos."));
 
         boolean senhaCorreta = cryptoService.verificarSenha(senhaPura, usuario.getHashSenha(), usuario.getSalt());
         if (!senhaCorreta) {
-            throw new RegraDeNegocioException("Erro: identificador ou senhas incorretos.");
+            throw new RegraDeNegocioException("Identificador ou senha incorretos.");
         }
 
         return usuario;

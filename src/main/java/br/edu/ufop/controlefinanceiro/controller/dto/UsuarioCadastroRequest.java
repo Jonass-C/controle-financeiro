@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 public class UsuarioCadastroRequest {
 
-    @NotBlank(message = "O identificador é obrigatório.")
-    @Size(max = 255, message = "O identificador deve ter no máximo 255 caracteres.")
+    @NotBlank(message = "O identificador de login é obrigatório.")
+    @Size(max = 255, message = "O identificador de login deve ter no máximo 255 caracteres.")
     private String identificadorLogin;
 
     @NotBlank(message = "A senha é obrigatória.")

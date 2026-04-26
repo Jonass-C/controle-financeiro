@@ -28,7 +28,7 @@ Content-Type: application/json
   "confirmacaoSenha": "senha_diferente"
 }
 
-### Teste 4: Tentar login com senha ERRADA (Vai retornar erro 400 Bad Request com a mensagem JSON amigável)
+### Teste 4: Tentar login com senha errada
 POST http://localhost:8080/usuarios/login
 Content-Type: application/json
 

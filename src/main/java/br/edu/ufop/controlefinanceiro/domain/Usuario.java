@@ -20,8 +20,8 @@ public class Usuario {
     @EqualsAndHashCode.Include
     private Integer id;
 
-    @NotBlank(message = "O identificador de login não pode ser vazio")
-    @Size(max = 255, message = "O identificador deve ter no máximo 255 caracteres")
+    @NotBlank(message = "O identificador de login é obrigatório.")
+    @Size(max = 255, message = "O identificador de login deve ter no máximo 255 caracteres.")
     @Column(name = "identificador_login", nullable = false, unique = true, length = 255)
     private String identificadorLogin;
 
