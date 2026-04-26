@@ -1,6 +1,7 @@
 package br.edu.ufop.controlefinanceiro.service;
 
 import br.edu.ufop.controlefinanceiro.domain.Usuario;
+import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
 import br.edu.ufop.controlefinanceiro.security.CryptoService;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +16,11 @@ public class UsuarioService {
 
     public void cadastrarUsuario(String identificadorLogin, String senhaPura, String confirmacaoSenha) {
         if (!senhaPura.equals(confirmacaoSenha)) {
-            throw new IllegalArgumentException("Erro: senhas incorretas.");
+            throw new RegraDeNegocioException("Erro: senhas incorretas.");
         }
 
         if (usuarioRepository.existsByIdentificadorLogin(identificadorLogin)) {
-            throw new IllegalArgumentException("Erro: já existe um usuário com esse identificador.");
+            throw new RegraDeNegocioException("Erro: já existe um usuário com esse identificador.");
         }
 
         String salt = cryptoService.gerarSalt();
@@ -36,11 +37,11 @@ public class UsuarioService {
 
     public Usuario autenticarUsuario(String identificadorLogin, String senhaPura) {
         Usuario usuario = usuarioRepository.findByIdentificadorLogin(identificadorLogin)
-                .orElseThrow(() -> new IllegalArgumentException("Erro: identificador ou senhas incorretos."));
+                .orElseThrow(() -> new RegraDeNegocioException("Erro: identificador ou senhas incorretos."));
 
         boolean senhaCorreta = cryptoService.verificarSenha(senhaPura, usuario.getHashSenha(), usuario.getSalt());
         if (!senhaCorreta) {
-            throw new IllegalArgumentException("Erro: identificador ou senhas incorretos.");
+            throw new RegraDeNegocioException("Erro: identificador ou senhas incorretos.");
         }
 
         return usuario;
