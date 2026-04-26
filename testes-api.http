@@ -1,0 +1,27 @@
+### Teste 1: Tentar cadastrar usuário com sucesso
+POST http://localhost:8080/usuarios/cadastro
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha123",
+  "confirmacaoSenha": "senha123"
+}
+
+### Teste 2: Tentar login com senha ERRADA (Vai estourar erro 500 no console por enquanto, pois ainda não fizemos o tratador de erros global, mas é o esperado!)
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha_errada"
+}
+
+### Teste 3: Tentar login com sucesso
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha123"
+}
