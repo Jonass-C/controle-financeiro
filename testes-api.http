@@ -1,0 +1,57 @@
+### Teste 1: Tentar cadastrar usuário com sucesso
+POST http://localhost:8080/usuarios/cadastro
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha123",
+  "confirmacaoSenha": "senha123"
+}
+
+### Teste 2: Tentar cadastrar usuário já existente
+POST http://localhost:8080/usuarios/cadastro
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha123",
+  "confirmacaoSenha": "senha123"
+}
+
+### Teste 3: Tentar cadastrar com senhas diferentes
+POST http://localhost:8080/usuarios/cadastro
+Content-Type: application/json
+
+{
+  "identificadorLogin": "novo@ufop.br",
+  "senhaPura": "senha123",
+  "confirmacaoSenha": "senha_diferente"
+}
+
+### Teste 4: Tentar login com senha errada
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha_errada"
+}
+
+### Teste 5: Tentar login com sucesso
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha123"
+}
+
+### Teste 6: Tentar cadastrar com DTO inválido (campos vazios e senha curta)
+POST http://localhost:8080/usuarios/cadastro
+Content-Type: application/json
+
+{
+  "identificadorLogin": "",
+  "senhaPura": "123",
+  "confirmacaoSenha": ""
+}
