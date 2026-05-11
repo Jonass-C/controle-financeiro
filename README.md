@@ -12,12 +12,12 @@ O projeto tem como objetivo desenvolver uma aplicação web voltada ao controle 
 
 # 👥 Equipe de Desenvolvimento
 
-| Integrante | Papel | Responsabilidades |
-|---|---|---|
-| **Jonas** | Backend Developer | Desenvolvimento backend e integração com banco de dados |
-| **Júlia** | Frontend Developer | Desenvolvimento das interfaces e estilização das páginas |
-| **André** | Frontend Developer | Desenvolvimento frontend e integração com backend |
-| **João Pedro** | Backend Developer | Implementação das regras de negócio e APIs |
+| Integrante | Papel |
+|---|---|
+| **Jonas** | Backend Developer |
+| **Júlia** | Frontend Developer |
+| **André** | Frontend Developer |
+| **João Pedro** | Backend Developer |
 
 ---
 
@@ -47,60 +47,6 @@ O projeto tem como objetivo desenvolver uma aplicação web voltada ao controle 
 | PB08 | Sistema de metas financeiras (Cofres) | 🟢 Baixa |
 | PB09 | Logout do usuário | 🟡 Média |
 | PB10 | Interface responsiva e organizada | 🟡 Média |
-
----
-
-# 🏃 Sprint Backlog
-
-## Sprint 1 — Estrutura Inicial e Autenticação
-📅 Duração: 2 semanas
-
-| Tarefa | Responsável |
-|---|---|
-| Configuração inicial do projeto | André |
-| Configuração do banco de dados SQLite | Jonas |
-| Criação da tela de login | Júlia |
-| Criação da tela de cadastro | André |
-| Implementação da autenticação de usuários | João Pedro |
-
----
-
-## Sprint 2 — Gestão Financeira
-📅 Duração: 2 semanas
-
-| Tarefa | Responsável |
-|---|---|
-| Criação da entidade de transações | João Pedro |
-| Implementação do cadastro de receitas e despesas | Jonas |
-| Desenvolvimento da tela de gestão financeira | Júlia |
-| Implementação da exclusão de transações | André |
-| Integração frontend e backend | Equipe |
-
----
-
-## Sprint 3 — Dashboard e Estatísticas
-📅 Duração: 2 semanas
-
-| Tarefa | Responsável |
-|---|---|
-| Desenvolvimento do dashboard financeiro | João Pedro |
-| Implementação dos gráficos financeiros | Jonas |
-| Exibição de saldo, receitas e despesas | André |
-| Ajustes visuais da interface | Júlia |
-| Testes gerais do sistema | Equipe |
-
----
-
-## Sprint 4 — Finalização do Projeto
-📅 Duração: 2 semanas
-
-| Tarefa | Responsável |
-|---|---|
-| Correção de bugs | Equipe |
-| Melhorias de usabilidade | Equipe |
-| Organização do código | Equipe |
-| Atualização da documentação | Equipe |
-| Preparação para apresentação final | Equipe |
 
 ---
 
