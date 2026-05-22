@@ -43,7 +43,6 @@ O projeto tem como objetivo desenvolver uma aplicação web voltada ao controle 
 | US09 | Como usuário, quero receber confirmação antes de excluir uma transação para evitar exclusões acidentais. |
 | US10 | Como usuário, quero visualizar uma mensagem de saudação no cabeçalho com meu nome para personalizar a experiência. |
 | US11 | Como usuário, quero realizar logout do sistema para encerrar minha sessão com segurança. |
-| US12 | Como usuário, quero que o sistema valide login e cadastro diretamente no banco de dados para garantir autenticidade e persistência das informações. |
 
 ---
 
