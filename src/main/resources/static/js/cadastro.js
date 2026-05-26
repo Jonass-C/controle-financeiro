@@ -26,4 +26,8 @@ form.addEventListener("submit", function (event) {
     }
 
     mensagem.textContent = "Cadastro realizado com sucesso!";
+
+    localStorage.setItem("nomeUsuario", nome);
+
+    window.location.href = "gestao.html";
 });

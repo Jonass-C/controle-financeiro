@@ -1,0 +1,276 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+
+    min-height: 100vh;
+}
+
+/* CONTAINER */
+
+.container {
+    width: 90%;
+    margin: 30px auto;
+}
+
+/* HEADER */
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 32px;
+}
+
+.usuario {
+    font-size: 18px;
+}
+
+/* RESUMO */
+
+.resumo-financeiro {
+    display: flex;
+    gap: 20px;
+
+    margin-bottom: 30px;
+}
+
+.card {
+    flex: 1;
+
+    background-color: #1c1c1c;
+
+    padding: 25px;
+
+    border: 1px solid white;
+    border-radius: 10px;
+}
+
+.card h2 {
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.card p {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* BOTÃO */
+
+.acoes {
+    margin-bottom: 30px;
+}
+
+#abrir-modal {
+    padding: 12px 20px;
+
+    background-color: white;
+    color: black;
+
+    border: none;
+    border-radius: 5px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+#abrir-modal:hover {
+    background-color: #ccc;
+}
+
+/* TABELA */
+
+.lista-transacoes {
+    background-color: #1c1c1c;
+
+    padding: 20px;
+
+    border: 1px solid white;
+    border-radius: 10px;
+}
+
+.lista-transacoes h2 {
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 15px;
+
+    text-align: center;
+
+    border-bottom: 1px solid #333;
+}
+
+th {
+    background-color: #222;
+}
+
+.editar,
+.excluir {
+    padding: 8px 12px;
+
+    border: none;
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+.editar {
+    background-color: white;
+    color: black;
+
+    margin-right: 8px;
+}
+
+.editar:hover {
+    background-color: #ccc;
+}
+
+.excluir {
+    background-color: #444;
+    color: white;
+}
+
+.excluir:hover {
+    background-color: #666;
+}
+
+/* MODAL */
+
+.modal {
+    display: none;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: rgba(0, 0, 0, 0.7);
+
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-conteudo {
+    background-color: #1c1c1c;
+
+    width: 400px;
+
+    padding: 30px;
+
+    border-radius: 10px;
+    border: 1px solid white;
+}
+
+.modal-conteudo h2 {
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+/* INPUTS */
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+
+    margin-bottom: 18px;
+}
+
+label {
+    margin-bottom: 8px;
+}
+
+input,
+select {
+    padding: 12px;
+
+    background-color: #111;
+    color: white;
+
+    border: 1px solid white;
+    border-radius: 5px;
+
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    border-color: #ccc;
+}
+
+/* NOVA CATEGORIA */
+
+#nova-categoria-group {
+    display: none;
+}
+
+/* BOTÕES MODAL */
+
+.modal-botoes {
+    display: flex;
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+.modal-botoes button {
+    flex: 1;
+
+    padding: 12px;
+
+    border: none;
+    border-radius: 5px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.modal-botoes button[type="submit"] {
+    background-color: white;
+    color: black;
+}
+
+.modal-botoes button[type="submit"]:hover {
+    background-color: #ccc;
+}
+
+#fechar-modal {
+    background-color: #444;
+    color: white;
+}
+
+#fechar-modal:hover {
+    background-color: #666;
+}
