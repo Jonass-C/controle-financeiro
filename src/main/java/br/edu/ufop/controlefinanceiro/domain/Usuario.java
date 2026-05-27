@@ -20,6 +20,11 @@ public class Usuario {
     @EqualsAndHashCode.Include
     private Integer id;
 
+    @NotBlank(message = "Informe o seu nome.")
+    @Size(max = 100, message = "O nome deve ter no máximo 100 caracteres.")
+    @Column(name = "nome", nullable = false, length = 100)
+    private String nome;
+
     @NotBlank(message = "O identificador de login é obrigatório.")
     @Size(max = 255, message = "O identificador de login deve ter no máximo 255 caracteres.")
     @Column(name = "identificador_login", nullable = false, unique = true, length = 255)

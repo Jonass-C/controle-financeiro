@@ -24,6 +24,7 @@ public class UsuarioController {
     @PostMapping("/cadastro")
     public ResponseEntity<String> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request) {
         usuarioService.cadastrarUsuario(
+                request.getNome(),
                 request.getIdentificadorLogin(),
                 request.getSenhaPura(),
                 request.getConfirmacaoSenha()
