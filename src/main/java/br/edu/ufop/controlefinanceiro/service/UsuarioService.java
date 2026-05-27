@@ -14,7 +14,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final CryptoService cryptoService;
 
-    public void cadastrarUsuario(String identificadorLogin, String senhaPura, String confirmacaoSenha) {
+    public void cadastrarUsuario(String nome, String identificadorLogin, String senhaPura, String confirmacaoSenha) {
         if (!senhaPura.equals(confirmacaoSenha)) {
             throw new RegraDeNegocioException("As senhas não coincidem.");
         }
@@ -27,6 +27,7 @@ public class UsuarioService {
         String hashSenha = cryptoService.hashSenha(senhaPura, salt);
 
         Usuario usuario = Usuario.builder()
+                .nome(nome)
                 .identificadorLogin(identificadorLogin)
                 .hashSenha(hashSenha)
                 .salt(salt)

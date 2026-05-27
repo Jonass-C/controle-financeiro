@@ -3,6 +3,7 @@ POST http://localhost:8080/usuarios/cadastro
 Content-Type: application/json
 
 {
+  "nome": "admin",
   "identificadorLogin": "admin@ufop.br",
   "senhaPura": "senha123",
   "confirmacaoSenha": "senha123"
@@ -13,6 +14,7 @@ POST http://localhost:8080/usuarios/cadastro
 Content-Type: application/json
 
 {
+  "nome": "admin",
   "identificadorLogin": "admin@ufop.br",
   "senhaPura": "senha123",
   "confirmacaoSenha": "senha123"
@@ -23,6 +25,7 @@ POST http://localhost:8080/usuarios/cadastro
 Content-Type: application/json
 
 {
+  "nome": "novo",
   "identificadorLogin": "novo@ufop.br",
   "senhaPura": "senha123",
   "confirmacaoSenha": "senha_diferente"
@@ -46,7 +49,7 @@ Content-Type: application/json
   "senhaPura": "senha123"
 }
 
-### Teste 6: Tentar cadastrar com DTO inválido (campos vazios e senha curta)
+### Teste 6: Tentar cadastrar com DTO inválido (campos vazios, senha curta e sem nome)
 POST http://localhost:8080/usuarios/cadastro
 Content-Type: application/json
 
