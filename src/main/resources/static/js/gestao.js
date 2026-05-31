@@ -23,6 +23,8 @@ const form = document.getElementById("form-transacao");
 
 const tabela = document.getElementById("tabela-transacoes");
 
+let linhaEditando = null;
+
 /* ABRIR MODAL */
 
 abrirModal.addEventListener("click", function () {
@@ -121,31 +123,47 @@ form.addEventListener("submit", function (event) {
 
     /* CRIAR LINHA */
 
-    const novaLinha = document.createElement("tr");
-
-    novaLinha.innerHTML = `
+    const conteudoLinha = `
     
-        <td>${nome}</td>
-        <td data-data="${data}">
-            ${dataFormatada}
-        </td>
-        <td>${categoriaValor}</td>
-        <td>${tipo}</td>
-        <td>R$ ${valor}</td>
+    <td>${nome}</td>
 
-        <td>
-            <button class="editar">
-                Editar
-            </button>
+    <td data-data="${data}">
+        ${dataFormatada}
+    </td>
 
-            <button class="excluir">
-                Excluir
-            </button>
-        </td>
-    
-    `;
+    <td>${categoriaValor}</td>
 
-    tabela.appendChild(novaLinha);
+    <td>${tipo}</td>
+
+    <td>R$ ${valor}</td>
+
+    <td>
+        <button class="editar">
+            Editar
+        </button>
+
+        <button class="excluir">
+            Excluir
+        </button>
+    </td>
+
+`;
+
+    if (linhaEditando) {
+
+        linhaEditando.innerHTML = conteudoLinha;
+
+        linhaEditando = null;
+
+    } else {
+
+        const novaLinha = document.createElement("tr");
+
+        novaLinha.innerHTML = conteudoLinha;
+
+        tabela.appendChild(novaLinha);
+
+    }
 
     /* LIMPAR FORM */
 
@@ -224,6 +242,8 @@ tabela.addEventListener("click", function (event) {
             categoriaTexto;
 
         modal.style.display = "flex";
+
+        linhaEditando = linha;
 
     }
 

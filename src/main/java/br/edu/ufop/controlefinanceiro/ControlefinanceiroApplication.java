@@ -8,6 +8,7 @@ public class ControlefinanceiroApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ControlefinanceiroApplication.class, args);
+		System.out.println("http://localhost:8080");
 	}
 
 }
