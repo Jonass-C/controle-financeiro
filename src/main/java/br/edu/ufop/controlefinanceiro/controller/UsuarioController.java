@@ -1,5 +1,6 @@
 package br.edu.ufop.controlefinanceiro.controller;
 
+import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioCadastroRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioLoginRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioResponse;
@@ -34,18 +35,22 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody UsuarioLoginRequest request) {
-        Usuario usuarioLogado = usuarioService.autenticarUsuario(
-                request.getIdentificadorLogin(),
-                request.getSenhaPura()
-        );
+    public ResponseEntity<Object> login(@Valid @RequestBody UsuarioLoginRequest request) {
+        try {
+            Usuario usuarioLogado = usuarioService.autenticarUsuario(
+                    request.getIdentificadorLogin(),
+                    request.getSenhaPura()
+            );
 
-        UsuarioResponse response = new UsuarioResponse(
-                usuarioLogado.getId(),
-                usuarioLogado.getIdentificadorLogin()
-        );
+            UsuarioResponse response = new UsuarioResponse(
+                    usuarioLogado.getId(),
+                    usuarioLogado.getIdentificadorLogin()
+            );
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+
+        } catch (RegraDeNegocioException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-
 }

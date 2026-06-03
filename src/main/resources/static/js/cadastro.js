@@ -10,15 +10,54 @@ form.addEventListener("submit", function (event) {
 
     if (nome === "" || identificador === "" || senha === "" || confirmarSenha === "") {
         mensagem.textContent = "Preencha todos os campos.";
+        mensagem.style.color = "red";
         return;
     }
 
     if (senha !== confirmarSenha) {
         mensagem.textContent = "As senhas não coincidem.";
+        mensagem.style.color = "red";
         return;
     }
 
-    mensagem.textContent = "Cadastro realizado com sucesso!";
-    localStorage.setItem("nomeUsuario", nome);
-    window.location.href = "gestao.html";
+    if (senha !== confirmarSenha) {
+            mensagem.textContent = "As senhas não coincidem.";
+            mensagem.style.color = "red";
+            return;
+    }
+
+    const dadosCadastro = {
+            nome: nome,
+            identificadorLogin: identificador,
+            senhaPura: senha,
+            confirmacaoSenha: confirmarSenha
+    };
+
+    fetch("/usuarios/cadastro", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(dadosCadastro)
+    })
+    .then(async response => {
+        if (response.ok) {
+            const textoSucesso = await response.text();
+            mensagem.textContent = textoSucesso;
+            mensagem.style.color = "green";
+            form.reset();
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 2000);
+        } else {
+            const textoErro = await response.text();
+            mensagem.textContent = textoErro || "Erro ao realizar cadastro.";
+            mensagem.style.color = "red";
+        }
+    })
+    .catch(error => {
+        console.error("erro na requisicao:", error);
+        mensagem.textContent = "Erro ao conectar com o servidor.";
+        mensagem.style.color = "red";
+    });
 });
