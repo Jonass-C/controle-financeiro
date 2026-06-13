@@ -1,250 +1,267 @@
-const nomeUsuario =
-    localStorage.getItem("nomeUsuario");
-
-if (nomeUsuario) {
-
-    const primeiroNome =
-        nomeUsuario.split(" ")[0];
-
-    document.getElementById("usuario-nome")
-        .textContent = `Olá, ${primeiroNome}`;
-
-}
-
-const modal = document.getElementById("modal");
-
-const abrirModal = document.getElementById("abrir-modal");
-const fecharModal = document.getElementById("fechar-modal");
-
+let linhaEditando = null;
+let linhaExcluir = null;
+const nomeUsuario = localStorage.getItem("nomeUsuario");
+const modal = document.getElementById("modal-transacao");
+const modalExcluir = document.getElementById("modal-excluir");
+const abrir = document.getElementById("abrir-modal");
+const cancelar = document.getElementById("cancelar");
 const categoria = document.getElementById("categoria");
-const novaCategoriaGroup = document.getElementById("nova-categoria-group");
-
+const novaCategoria = document.getElementById("nova-categoria");
+const btnSimExcluir = document.getElementById("sim-excluir");
+const btnNaoExcluir = document.getElementById("nao-excluir");
+const modalObservacao = document.getElementById("modal-observacao");
+const textoObservacao = document.getElementById("texto-observacao");
+const fecharObservacao = document.getElementById("fechar-observacao");
 const form = document.getElementById("form-transacao");
 
-const tabela = document.getElementById("tabela-transacoes");
+if(nomeUsuario){
+    const primeiroNome = nomeUsuario.split(" ")[0];
+    document.getElementById("usuario-nome").textContent = `Olá, ${primeiroNome}`;
+}
 
-let linhaEditando = null;
-
-/* ABRIR MODAL */
-
-abrirModal.addEventListener("click", function () {
-
-    modal.style.display = "flex";
-
-});
-
-/* FECHAR MODAL */
-
-fecharModal.addEventListener("click", function () {
-
-    modal.style.display = "none";
-
+function limparFormulario(){
     form.reset();
+    linhaEditando = null;
+    novaCategoria.style.display = "none";
+    document.getElementById("nome").classList.remove("erro-campo");
+    document.getElementById("valor").classList.remove("erro-campo");
+    document.getElementById("tipo").classList.remove("erro-campo");
+    document.getElementById("categoria").classList.remove("erro-campo");
+    document.getElementById("data").classList.remove("erro-campo");
+    document.getElementById("observacao").classList.remove("erro-campo");
+    document.getElementById("nova-categoria").classList.remove("erro-campo");
+}
 
-    novaCategoriaGroup.style.display = "none";
+function abrirModal(){
+    limparFormulario();
+    modal.style.display = "flex";
+}
 
-});
+function fecharModal(){
+    limparFormulario();
+    modal.style.display = "none";
+}
 
-/* FECHAR AO CLICAR FORA */
-
-window.addEventListener("click", function (event) {
-
-    if (event.target === modal) {
-
-        modal.style.display = "none";
-
-        form.reset();
-
-        novaCategoriaGroup.style.display = "none";
-
+abrir.addEventListener("click", abrirModal);
+cancelar.addEventListener("click", fecharModal);
+window.addEventListener("click", function(e){
+    if(e.target == modal){
+        fecharModal();
+    }
+    if(e.target == modalExcluir){
+        linhaExcluir = null;
+        modalExcluir.style.display = "none";
+    }
+    if(e.target == modalObservacao){
+        modalObservacao.style.display = "none";
     }
 
 });
 
-/* NOVA CATEGORIA */
-
-categoria.addEventListener("change", function () {
-
-    if (categoria.value === "Adicionar categoria") {
-
-        novaCategoriaGroup.style.display = "flex";
-
-    } else {
-
-        novaCategoriaGroup.style.display = "none";
-
+categoria.addEventListener("change", function(){
+    if(categoria.value == "nova"){
+        novaCategoria.style.display = "block";
+    }else{
+        novaCategoria.style.display = "none";
+        novaCategoria.value = "";
     }
-
 });
 
-/* ADICIONAR TRANSAÇÃO */
-
-form.addEventListener("submit", function (event) {
-
-    event.preventDefault();
+form.addEventListener("submit", function(e){
+    e.preventDefault();
+    document.getElementById("nome").classList.remove("erro-campo");
+    document.getElementById("valor").classList.remove("erro-campo");
+    document.getElementById("tipo").classList.remove("erro-campo");
+    document.getElementById("categoria").classList.remove("erro-campo");
+    document.getElementById("data").classList.remove("erro-campo");
+    document.getElementById("observacao").classList.remove("erro-campo");
+    document.getElementById("nova-categoria").classList.remove("erro-campo");
 
     const nome = document.getElementById("nome").value;
-
-    const data = document.getElementById("data").value;
-
     const valor = document.getElementById("valor").value;
-
     const tipo = document.getElementById("tipo").value;
+    const data = document.getElementById("data").value;
+    const observacao = document.getElementById("observacao").value;
 
-    let categoriaValor = categoria.value;
-
-    /* NOVA CATEGORIA */
-
-    if (categoriaValor === "Adicionar categoria") {
-
-        categoriaValor =
-            document.getElementById("nova-categoria").value;
-
-    }
-
-    /* VALIDAR CAMPOS */
-
-    if (
-        nome === "" ||
-        data === "" ||
-        valor === ""
-    ) {
-
-        alert("Preencha todos os campos.");
-
+    if(nome.trim() == ""){
+        document.getElementById("nome").classList.add("erro-campo");
         return;
-
     }
 
-    /* FORMATAR DATA */
+    if(valor <= 0){
+        document.getElementById("valor").classList.add("erro-campo");
+        return;
+    }
 
-    const dataFormatada = new Date(data)
-        .toLocaleDateString("pt-BR");
+    if(tipo == ""){
+        document.getElementById("tipo").classList.add("erro-campo");
+        return;
+    }
 
-    /* CRIAR LINHA */
+    if(document.getElementById("categoria").value == ""){
+        document.getElementById("categoria").classList.add("erro-campo");
+        return;
+    }
 
-    const conteudoLinha = `
-    
-    <td>${nome}</td>
+    if(data == ""){
+        document.getElementById("data").classList.add("erro-campo");
+        return;
+    }
 
-    <td data-data="${data}">
-        ${dataFormatada}
-    </td>
+    let categoriaFinal;
 
-    <td>${categoriaValor}</td>
+    if(document.getElementById("categoria").value == "nova"){
+        if(document.getElementById("nova-categoria").value.trim() == ""){
+            document.getElementById("nova-categoria").classList.add("erro-campo");
+            return;
+        }
+        categoriaFinal = document.getElementById("nova-categoria").value;
+    }else{
+        categoriaFinal = document.getElementById("categoria").value;
+    }
 
-    <td>${tipo}</td>
+    const partesData = data.split("-");
 
-    <td>R$ ${valor}</td>
+    const dataFormatada = partesData[2] + "/" + partesData[1] + "/" + partesData[0];
 
-    <td>
-        <button class="editar">
-            Editar
-        </button>
+    const tabela = document.getElementById("tabela-transacoes");
 
-        <button class="excluir">
-            Excluir
-        </button>
-    </td>
+    let linha;
 
+    if(linhaEditando){
+        linha = linhaEditando;
+    }else{
+        linha = tabela.insertRow();
+        for(let i=0;i<6;i++){
+            linha.insertCell(i);
+        }
+    }
+
+    linha.cells[0].innerHTML = nome;
+    linha.cells[1].innerHTML = dataFormatada;
+    linha.cells[2].innerHTML = categoriaFinal;
+    linha.cells[3].innerHTML = tipo;
+
+    linha.cells[4].innerHTML = "R$ " + Number(valor).toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+    linha.dataset.observacao = observacao;
+
+    const acoes = linha.cells[5];
+
+    acoes.innerHTML = `
+    <button class="btn-acao visualizar" title="Visualizar observação">
+        <span class="material-symbols-outlined">
+            visibility
+        </span>
+    </button>
+
+    <button class="btn-acao editar" title="Editar transação">
+        <span class="material-symbols-outlined">
+            edit
+        </span>
+    </button>
+
+    <button class="btn-acao excluir" title="Excluir transação">
+        <span class="material-symbols-outlined">
+            delete
+        </span>
+    </button>
 `;
 
-    if (linhaEditando) {
+    acoes.querySelector(".excluir")
+        .addEventListener("click", function(){
+            linhaExcluir = linha;
+            modalExcluir.style.display = "flex";
+        });
 
-        linhaEditando.innerHTML = conteudoLinha;
+    acoes.querySelector(".visualizar")
+        .addEventListener("click", function(){
+            if(linha.dataset.observacao == ""){
+                textoObservacao.innerHTML = "Nenhuma observação cadastrada.";
+            }else{
+                textoObservacao.innerHTML = linha.dataset.observacao;
+            }
+            modalObservacao.style.display = "flex";
+        });
 
-        linhaEditando = null;
-
-    } else {
-
-        const novaLinha = document.createElement("tr");
-
-        novaLinha.innerHTML = conteudoLinha;
-
-        tabela.appendChild(novaLinha);
-
-    }
-
-    /* LIMPAR FORM */
-
-    form.reset();
-
-    novaCategoriaGroup.style.display = "none";
-
-    /* FECHAR MODAL */
-
-    modal.style.display = "none";
-
+    acoes.querySelector(".editar")
+        .addEventListener("click", function(){
+            linhaEditando = linha;
+            document.getElementById("nome").value = linha.cells[0].innerHTML;
+            const dataTabela = linha.cells[1].innerHTML.split("/");
+            document.getElementById("data").value = dataTabela[2] + "-" + dataTabela[1] + "-" + dataTabela[0];
+            if(document.getElementById("categoria").querySelector(`option[value="${linha.cells[2].innerHTML}"]`)){
+                document.getElementById("categoria").value = linha.cells[2].innerHTML;
+            }else{
+                document.getElementById("categoria").value = "nova";
+                novaCategoria.style.display = "block";
+                novaCategoria.value = linha.cells[2].innerHTML;
+            }
+            document.getElementById("tipo").value = linha.cells[3].innerHTML;
+            document.getElementById("valor").value = linha.cells[4].innerHTML
+                    .replace("R$ ", "")
+                    .replace(/\./g, "")
+                    .replace(",", ".");
+            document.getElementById("observacao").value = linha.dataset.observacao;
+            modal.style.display = "flex";
+        });
+    atualizarResumo();
+    fecharModal();
 });
 
-/* EXCLUIR TRANSAÇÃO */
+btnNaoExcluir.addEventListener("click", function(){
+    linhaExcluir = null;
+    modalExcluir.style.display = "none";
+});
 
-tabela.addEventListener("click", function (event) {
+btnSimExcluir.addEventListener("click", function(){
+    if(linhaExcluir){
+        linhaExcluir.remove();
+        atualizarResumo();
+    }
+    linhaExcluir = null;
+    modalExcluir.style.display = "none";
+});
 
-    if (
-        event.target.classList.contains("excluir")
-    ) {
-
-        const confirmar = confirm(
-            "Deseja excluir esta transação?"
-        );
-
-        if (confirmar) {
-
-            event.target
-                .closest("tr")
-                .remove();
-
+function atualizarResumo(){
+    let receitas = 0;
+    let despesas = 0;
+    const tabela = document.getElementById("tabela-transacoes");
+    for(let i = 0; i < tabela.rows.length; i++){
+        const tipo = tabela.rows[i].cells[3].innerHTML;
+        const valorTexto = tabela.rows[i].cells[4].innerHTML
+                .replace("R$ ", "")
+                .replace(/\./g, "")
+                .replace(",", ".");
+        const valor = parseFloat(valorTexto);
+        if(tipo == "Receita"){
+            receitas += valor;
+        }else{
+            despesas += valor;
         }
-
     }
+    const saldo = receitas - despesas;
 
+    document.getElementById("ganhos").innerHTML = receitas.toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+    document.getElementById("gastos").innerHTML = despesas.toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+    document.getElementById("saldo").innerHTML = saldo.toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+}
+
+const campos = document.querySelectorAll("input, select, textarea");
+
+campos.forEach(function(campo){
+    campo.addEventListener("input", function(){
+            campo.classList.remove("erro-campo");
+        }
+    );
+    campo.addEventListener("change", function(){
+            campo.classList.remove("erro-campo");
+        }
+    );
 });
 
-/* EDITAR TRANSAÇÃO */
-
-tabela.addEventListener("click", function (event) {
-
-    if (
-        event.target.classList.contains("editar")
-    ) {
-
-        const linha =
-            event.target.closest("tr");
-
-        const colunas =
-            linha.querySelectorAll("td");
-
-        const nome = colunas[0].textContent;
-
-        const dataOriginal =
-            colunas[1].getAttribute("data-data");
-
-        const categoriaTexto =
-            colunas[2].textContent;
-
-        const tipo = colunas[3].textContent;
-
-        const valor =
-            colunas[4]
-                .textContent
-                .replace("R$ ", "");
-
-        document.getElementById("nome").value = nome;
-
-        document.getElementById("data").value = dataOriginal;
-
-        document.getElementById("valor").value = valor;
-
-        document.getElementById("tipo").value = tipo;
-
-        document.getElementById("categoria").value =
-            categoriaTexto;
-
-        modal.style.display = "flex";
-
-        linhaEditando = linha;
-
-    }
-
+fecharObservacao.addEventListener("click", function(){
+        modalObservacao.style.display = "none";
 });
+
+atualizarResumo();
