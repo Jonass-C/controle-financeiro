@@ -23,22 +23,13 @@ public class UsuarioController {
 
     @PostMapping("/cadastro")
     public ResponseEntity<String> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request) {
-        usuarioService.cadastrarUsuario(
-                request.getNome(),
-                request.getIdentificadorLogin(),
-                request.getSenhaPura(),
-                request.getConfirmacaoSenha()
-        );
-
+        usuarioService.cadastrarUsuario(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuário cadastrado com sucesso!");
     }
 
     @PostMapping("/login")
     public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody UsuarioLoginRequest request) {
-        Usuario usuarioLogado = usuarioService.autenticarUsuario(
-                request.getIdentificadorLogin(),
-                request.getSenhaPura()
-        );
+        Usuario usuarioLogado = usuarioService.autenticarUsuario(request);
 
         UsuarioResponse response = new UsuarioResponse(
                 usuarioLogado.getId(),
@@ -47,5 +38,4 @@ public class UsuarioController {
 
         return ResponseEntity.ok(response);
     }
-
 }

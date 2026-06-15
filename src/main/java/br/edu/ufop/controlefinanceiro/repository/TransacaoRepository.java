@@ -6,7 +6,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TransacaoRepository extends JpaRepository<Transacao, Integer> {
 
     boolean existsByCategoria(String categoria);
-    boolean existsByTipo(String tipo);
-    boolean existsByUsuarioId(Integer usuarioId);
-    Transacao findTransacaoById(Integer id);
 }

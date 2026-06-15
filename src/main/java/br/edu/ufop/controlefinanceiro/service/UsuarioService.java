@@ -1,5 +1,7 @@
 package br.edu.ufop.controlefinanceiro.service;
 
+import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioCadastroRequest;
+import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioLoginRequest;
 import br.edu.ufop.controlefinanceiro.domain.Usuario;
 import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
@@ -14,21 +16,21 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final CryptoService cryptoService;
 
-    public void cadastrarUsuario(String nome, String identificadorLogin, String senhaPura, String confirmacaoSenha) {
-        if (!senhaPura.equals(confirmacaoSenha)) {
+    public void cadastrarUsuario(UsuarioCadastroRequest request) {
+        if (!request.getSenhaPura().equals(request.getConfirmacaoSenha())) {
             throw new RegraDeNegocioException("As senhas não coincidem.");
         }
 
-        if (usuarioRepository.existsByIdentificadorLogin(identificadorLogin)) {
+        if (usuarioRepository.existsByIdentificadorLogin(request.getIdentificadorLogin())) {
             throw new RegraDeNegocioException("Já existe um usuário com esse identificador.");
         }
 
         String salt = cryptoService.gerarSalt();
-        String hashSenha = cryptoService.hashSenha(senhaPura, salt);
+        String hashSenha = cryptoService.hashSenha(request.getSenhaPura(), salt);
 
         Usuario usuario = Usuario.builder()
-                .nome(nome)
-                .identificadorLogin(identificadorLogin)
+                .nome(request.getNome())
+                .identificadorLogin(request.getIdentificadorLogin())
                 .hashSenha(hashSenha)
                 .salt(salt)
                 .build();
@@ -36,11 +38,11 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
-    public Usuario autenticarUsuario(String identificadorLogin, String senhaPura) {
-        Usuario usuario = usuarioRepository.findByIdentificadorLogin(identificadorLogin)
+    public Usuario autenticarUsuario(UsuarioLoginRequest request) {
+        Usuario usuario = usuarioRepository.findByIdentificadorLogin(request.getIdentificadorLogin())
                 .orElseThrow(() -> new RegraDeNegocioException("Identificador ou senha incorretos."));
 
-        boolean senhaCorreta = cryptoService.verificarSenha(senhaPura, usuario.getHashSenha(), usuario.getSalt());
+        boolean senhaCorreta = cryptoService.verificarSenha(request.getSenhaPura(), usuario.getHashSenha(), usuario.getSalt());
         if (!senhaCorreta) {
             throw new RegraDeNegocioException("Identificador ou senha incorretos.");
         }
