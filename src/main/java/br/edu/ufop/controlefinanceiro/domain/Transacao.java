@@ -1,11 +1,13 @@
 package br.edu.ufop.controlefinanceiro.domain;
 
+import br.edu.ufop.controlefinanceiro.domain.enums.Tipo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -28,11 +30,11 @@ public class Transacao {
     @Column(name = "titulo", nullable = false, length = 255)
     private String titulo;
 
-    @NotBlank(message = "Informe a data da transação.")
+    @NotNull(message = "Informe a data da transação.")
     @Column(name = "data", nullable = false)
-    private LocalDateTime data;
+    private LocalDate data;
 
-    @NotBlank(message = "Informe o valor da transação.")
+    @NotNull(message = "Informe o valor da transação.")
     @Column(name = "valor", nullable = false)
     private Double valor;
 
@@ -41,11 +43,14 @@ public class Transacao {
     @Column(name = "categoria", nullable = false, length = 64)
     private String categoria;
 
-    @NotBlank(message = "Informe o tipo da transação.")
-    @Size(max = 30, message = "O tipo deve ter no máximo 30 caracteres.")
+    @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false, length = 30)
-    private String tipo;
+    private Tipo tipo;
 
     @Column(name = "usuario_id", nullable = false)
     private Integer usuarioId;
+
+    @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
+    @Column(name = "descricao", length = 255)
+    private String descricao;
 }
