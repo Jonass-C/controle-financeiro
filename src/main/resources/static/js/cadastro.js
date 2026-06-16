@@ -50,8 +50,14 @@ form.addEventListener("submit", function (event) {
                 window.location.href = "index.html";
             }, 2000);
         } else {
-            const textoErro = await response.text();
-            mensagem.textContent = textoErro || "Erro ao realizar cadastro.";
+            //const textoErro = await response.text();
+            //mensagem.textContent = textoErro || "Erro ao realizar cadastro.";
+
+            // mudanca aqui: le o erro como json para extrair a mensagem limpa
+            const erroJson = await response.json();
+            // pega apenas o detail do erro do spring boot
+            const mensagemLimpa = erroJson.detail || "Erro ao realizar cadastro.";
+            mensagem.textContent = mensagemLimpa;
             mensagem.style.color = "red";
         }
     })

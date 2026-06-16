@@ -19,7 +19,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidacoes(MethodArgumentNotValidException e) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Erro de validação nos campos.");
+        String mensagemErro = e.getBindingResult().getFieldErrors().stream()
+                .map(erro -> erro.getDefaultMessage())
+                .findFirst()
+                .orElse("Erro de validacao nos campos.");
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, mensagemErro);
+
         Map<String, String> erros = new HashMap<>();
 
         e.getFieldErrors().forEach(

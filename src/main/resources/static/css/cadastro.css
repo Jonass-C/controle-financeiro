@@ -119,23 +119,26 @@ button:hover {
 }
 
 #mensagem {
-    margin-top: 15px;
+    margin-top: 10px;
     text-align: center;
     font-size: 14px;
+    margin-bottom: 20px;
+    font-weight: bold;
 }
 
-.login-link {
+.index-link {
     margin-top: 25px;
     text-align: center;
     color: #B3B3B3;
+    width: 100%;
 }
 
-.login-link a {
+.index-link a {
     color: #00C853;
     text-decoration: none;
     font-weight: 500;
 }
 
-.login-link a:hover {
+.index-link a:hover {
     color: #5EFC82;
 }

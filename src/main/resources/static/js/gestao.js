@@ -1,3 +1,13 @@
+const usuarioLogado = localStorage.getItem("nomeUsuario") ||
+    localStorage.getItem("usuario") ||
+    localStorage.getItem("usuarioId") ||
+    localStorage.getItem("NomeUsuario");
+
+if (!usuarioLogado) {
+    alert("Você precisa fazer login para acessar esta página.");
+    window.location.href = "/";
+}
+
 let linhaEditando = null;
 let linhaExcluir = null;
 const nomeUsuario = localStorage.getItem("nomeUsuario");
@@ -9,9 +19,9 @@ const categoria = document.getElementById("categoria");
 const novaCategoria = document.getElementById("nova-categoria");
 const btnSimExcluir = document.getElementById("sim-excluir");
 const btnNaoExcluir = document.getElementById("nao-excluir");
-const modalObservacao = document.getElementById("modal-observacao");
-const textoObservacao = document.getElementById("texto-observacao");
-const fecharObservacao = document.getElementById("fechar-observacao");
+const modalDescricao = document.getElementById("modal-descricao");
+const textoDescricao = document.getElementById("texto-descricao");
+const fecharDescricao = document.getElementById("fechar-descricao");
 const form = document.getElementById("form-transacao");
 
 if(nomeUsuario){
@@ -28,7 +38,7 @@ function limparFormulario(){
     document.getElementById("tipo").classList.remove("erro-campo");
     document.getElementById("categoria").classList.remove("erro-campo");
     document.getElementById("data").classList.remove("erro-campo");
-    document.getElementById("observacao").classList.remove("erro-campo");
+    document.getElementById("descricao").classList.remove("erro-campo");
     document.getElementById("nova-categoria").classList.remove("erro-campo");
 }
 
@@ -52,8 +62,8 @@ window.addEventListener("click", function(e){
         linhaExcluir = null;
         modalExcluir.style.display = "none";
     }
-    if(e.target == modalObservacao){
-        modalObservacao.style.display = "none";
+    if(e.target == modalDescricao){
+        modalDescricao.style.display = "none";
     }
 
 });
@@ -74,37 +84,49 @@ form.addEventListener("submit", function(e){
     document.getElementById("tipo").classList.remove("erro-campo");
     document.getElementById("categoria").classList.remove("erro-campo");
     document.getElementById("data").classList.remove("erro-campo");
-    document.getElementById("observacao").classList.remove("erro-campo");
+    document.getElementById("descricao").classList.remove("erro-campo");
     document.getElementById("nova-categoria").classList.remove("erro-campo");
 
     const nome = document.getElementById("nome").value;
     const valor = document.getElementById("valor").value;
     const tipo = document.getElementById("tipo").value;
     const data = document.getElementById("data").value;
-    const observacao = document.getElementById("observacao").value;
+    const descricao = document.getElementById("descricao").value;
+
+    let formularioValido = true;
 
     if(nome.trim() == ""){
         document.getElementById("nome").classList.add("erro-campo");
-        return;
+        formularioValido = false;
     }
 
-    if(valor <= 0){
+    if(valor === "" || Number(valor) <= 0){
         document.getElementById("valor").classList.add("erro-campo");
-        return;
+        formularioValido = false;
     }
 
     if(tipo == ""){
         document.getElementById("tipo").classList.add("erro-campo");
-        return;
+        formularioValido = false;
     }
 
     if(document.getElementById("categoria").value == ""){
         document.getElementById("categoria").classList.add("erro-campo");
-        return;
+        formularioValido = false;
     }
 
     if(data == ""){
         document.getElementById("data").classList.add("erro-campo");
+        formularioValido = false;
+    }
+
+    if(document.getElementById("categoria").value == "nova"){
+        if(document.getElementById("nova-categoria").value.trim() == ""){
+            document.getElementById("nova-categoria").classList.add("erro-campo");
+            formularioValido = false;
+        }
+    }
+    if(!formularioValido){
         return;
     }
 
@@ -121,9 +143,7 @@ form.addEventListener("submit", function(e){
     }
 
     const partesData = data.split("-");
-
     const dataFormatada = partesData[2] + "/" + partesData[1] + "/" + partesData[0];
-
     const tabela = document.getElementById("tabela-transacoes");
 
     let linha;
@@ -141,15 +161,14 @@ form.addEventListener("submit", function(e){
     linha.cells[1].innerHTML = dataFormatada;
     linha.cells[2].innerHTML = categoriaFinal;
     linha.cells[3].innerHTML = tipo;
-
     linha.cells[4].innerHTML = "R$ " + Number(valor).toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    linha.dataset.observacao = observacao;
+    linha.dataset.descricao = descricao;
 
     const acoes = linha.cells[5];
 
     acoes.innerHTML = `
-    <button class="btn-acao visualizar" title="Visualizar observação">
+    <button class="btn-acao visualizar" title="Visualizar descrição">
         <span class="material-symbols-outlined">
             visibility
         </span>
@@ -176,12 +195,12 @@ form.addEventListener("submit", function(e){
 
     acoes.querySelector(".visualizar")
         .addEventListener("click", function(){
-            if(linha.dataset.observacao == ""){
-                textoObservacao.innerHTML = "Nenhuma observação cadastrada.";
+            if(linha.dataset.descricao == ""){
+                textoDescricao.innerHTML = "Nenhuma descrição cadastrada.";
             }else{
-                textoObservacao.innerHTML = linha.dataset.observacao;
+                textoDescricao.innerHTML = linha.dataset.descricao;
             }
-            modalObservacao.style.display = "flex";
+            modalDescricao.style.display = "flex";
         });
 
     acoes.querySelector(".editar")
@@ -202,7 +221,7 @@ form.addEventListener("submit", function(e){
                     .replace("R$ ", "")
                     .replace(/\./g, "")
                     .replace(",", ".");
-            document.getElementById("observacao").value = linha.dataset.observacao;
+            document.getElementById("descricao").value = linha.dataset.descricao;
             modal.style.display = "flex";
         });
     atualizarResumo();
@@ -260,8 +279,8 @@ campos.forEach(function(campo){
     );
 });
 
-fecharObservacao.addEventListener("click", function(){
-        modalObservacao.style.display = "none";
+fecharDescricao.addEventListener("click", function(){
+        modalDescricao.style.display = "none";
 });
 
 atualizarResumo();

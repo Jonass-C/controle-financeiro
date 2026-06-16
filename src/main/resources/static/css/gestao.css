@@ -65,6 +65,9 @@ header{
 .card h2{
     margin-top:10px;
     font-size:32px;
+    word-wrap: break-word;
+    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .acoes{
@@ -102,6 +105,7 @@ header{
 table{
     width:100%;
     border-collapse:collapse;
+    table-layout: fixed;
 }
 
 th{
@@ -114,6 +118,8 @@ td{
     padding:18px;
     text-align:center;
     border-bottom:1px solid #2A2A2A;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 tr:hover{
@@ -145,6 +151,8 @@ tr:hover{
     justify-content:center;
     align-items:center;
     z-index:1000;
+    overflow-y:auto;
+    padding:20px 0;
 }
 
 .modal-content{
@@ -155,6 +163,8 @@ tr:hover{
     max-width:500px;
     padding:30px;
     border-radius:20px;
+    max-height:85vh;
+    overflow-y:auto;
 }
 
 .modal-content h2{
@@ -162,6 +172,25 @@ tr:hover{
     text-align:center;
 }
 
+.modal-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: transparent;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #2A2A2A;
+    border-radius: 10px;
+    border: 3px solid rgba(26, 26, 26, 0.95);
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #00C853;
+}
 .campo{
     display:flex;
     flex-direction:column;
@@ -183,12 +212,20 @@ tr:hover{
     border-radius:10px;
     outline:none;
     font-size:15px;
+
+
 }
 
 .campo input:focus,
 .campo select:focus,
 .campo textarea:focus{
     border-color:#00C853;
+}
+
+
+.campo input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%);
+    cursor: pointer;
 }
 
 .botoes{

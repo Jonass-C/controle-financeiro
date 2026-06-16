@@ -39,7 +39,7 @@ form.addEventListener("submit", function (event) {
                 window.location.href = "gestao.html";
             }, 1500);
         } else {
-            mensagem.textContent = "Usuario ou senha incorretos.";
+            mensagem.textContent = "Usuário ou senha incorretos.";
             mensagem.style.color = "red";
         }
     })
