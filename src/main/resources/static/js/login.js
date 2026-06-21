@@ -49,3 +49,9 @@ form.addEventListener("submit", function (event) {
         mensagem.style.color = "red";
     });
 });
+
+document.querySelectorAll("img").forEach(function(img){
+    img.addEventListener("contextmenu", function(e){
+        e.preventDefault();
+    });
+});

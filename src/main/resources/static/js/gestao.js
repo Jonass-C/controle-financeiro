@@ -1,13 +1,4 @@
-const usuarioLogado = localStorage.getItem("nomeUsuario") ||
-    localStorage.getItem("usuario") ||
-    localStorage.getItem("usuarioId") ||
-    localStorage.getItem("NomeUsuario");
-
-if (!usuarioLogado) {
-    alert("Você precisa fazer login para acessar esta página.");
-    window.location.href = "/";
-}
-
+let fp;
 let linhaEditando = null;
 let linhaExcluir = null;
 const nomeUsuario = localStorage.getItem("nomeUsuario");
@@ -23,6 +14,10 @@ const modalDescricao = document.getElementById("modal-descricao");
 const textoDescricao = document.getElementById("texto-descricao");
 const fecharDescricao = document.getElementById("fechar-descricao");
 const form = document.getElementById("form-transacao");
+const modalDashboard = document.getElementById("modal-dashboard");
+const abrirDashboard = document.getElementById("abrir-dashboard");
+const usuarioBtn = document.getElementById("usuario-btn");
+const menuUsuario = document.getElementById("menu-usuario");
 
 if(nomeUsuario){
     const primeiroNome = nomeUsuario.split(" ")[0];
@@ -37,7 +32,9 @@ function limparFormulario(){
     document.getElementById("valor").classList.remove("erro-campo");
     document.getElementById("tipo").classList.remove("erro-campo");
     document.getElementById("categoria").classList.remove("erro-campo");
-    document.getElementById("data").classList.remove("erro-campo");
+    if (fp && fp.altInput) {
+        fp.altInput.classList.remove("erro-campo");
+    }
     document.getElementById("descricao").classList.remove("erro-campo");
     document.getElementById("nova-categoria").classList.remove("erro-campo");
 }
@@ -54,6 +51,20 @@ function fecharModal(){
 
 abrir.addEventListener("click", abrirModal);
 cancelar.addEventListener("click", fecharModal);
+
+abrirDashboard.addEventListener("click", function(){
+    modalDashboard.style.display = "flex";
+});
+
+usuarioBtn.addEventListener("click", function(){
+    menuUsuario.classList.toggle("ativo");
+});
+
+document.getElementById("logout").addEventListener("click", function(){
+        localStorage.clear();
+        window.location.href="/";
+});
+
 window.addEventListener("click", function(e){
     if(e.target == modal){
         fecharModal();
@@ -64,6 +75,14 @@ window.addEventListener("click", function(e){
     }
     if(e.target == modalDescricao){
         modalDescricao.style.display = "none";
+    }
+
+    if(e.target == modalDashboard){
+        modalDashboard.style.display = "none";
+    }
+
+    if(!usuarioBtn.contains(e.target) && !menuUsuario.contains(e.target)){
+        menuUsuario.classList.remove("ativo");
     }
 
 });
@@ -83,7 +102,9 @@ form.addEventListener("submit", function(e){
     document.getElementById("valor").classList.remove("erro-campo");
     document.getElementById("tipo").classList.remove("erro-campo");
     document.getElementById("categoria").classList.remove("erro-campo");
-    document.getElementById("data").classList.remove("erro-campo");
+    if (fp && fp.altInput) {
+        fp.altInput.classList.remove("erro-campo");
+    }
     document.getElementById("descricao").classList.remove("erro-campo");
     document.getElementById("nova-categoria").classList.remove("erro-campo");
 
@@ -116,7 +137,9 @@ form.addEventListener("submit", function(e){
     }
 
     if(data == ""){
-        document.getElementById("data").classList.add("erro-campo");
+        if (fp && fp.altInput) {
+            fp.altInput.classList.add("erro-campo");
+        }
         formularioValido = false;
     }
 
@@ -133,17 +156,18 @@ form.addEventListener("submit", function(e){
     let categoriaFinal;
 
     if(document.getElementById("categoria").value == "nova"){
-        if(document.getElementById("nova-categoria").value.trim() == ""){
-            document.getElementById("nova-categoria").classList.add("erro-campo");
-            return;
-        }
         categoriaFinal = document.getElementById("nova-categoria").value;
     }else{
         categoriaFinal = document.getElementById("categoria").value;
     }
 
-    const partesData = data.split("-");
-    const dataFormatada = partesData[2] + "/" + partesData[1] + "/" + partesData[0];
+    let dataFormatada = "";
+    if (fp.selectedDates && fp.selectedDates.length > 0) {
+        dataFormatada = fp.formatDate(fp.selectedDates[0], "d/m/Y");
+    } else {
+        dataFormatada = document.getElementById("data").value;
+    }
+
     const tabela = document.getElementById("tabela-transacoes");
 
     let linha;
@@ -208,7 +232,7 @@ form.addEventListener("submit", function(e){
             linhaEditando = linha;
             document.getElementById("nome").value = linha.cells[0].innerHTML;
             const dataTabela = linha.cells[1].innerHTML.split("/");
-            document.getElementById("data").value = dataTabela[2] + "-" + dataTabela[1] + "-" + dataTabela[0];
+            fp.setDate(dataTabela[2] + "-" + dataTabela[1] + "-" + dataTabela[0]);
             if(document.getElementById("categoria").querySelector(`option[value="${linha.cells[2].innerHTML}"]`)){
                 document.getElementById("categoria").value = linha.cells[2].innerHTML;
             }else{
@@ -282,5 +306,48 @@ campos.forEach(function(campo){
 fecharDescricao.addEventListener("click", function(){
         modalDescricao.style.display = "none";
 });
+
+document.querySelectorAll("img").forEach(function(img){
+    img.addEventListener("contextmenu", function(e){
+        e.preventDefault();
+    });
+});
+
+fp = flatpickr("#calendario-container", {
+    wrap: true,
+    allowInput: true,
+    clickOpens: false,
+    position: "above right",
+    locale: "pt",
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d/m/Y",
+    disableMobile: true,
+    monthSelectorType: "dropdown",
+    showMonths: 1,
+    animate: true,
+    weekNumbers: false,
+    fixedHeight: true
+});
+
+document.getElementById("calendario-container").addEventListener("input", function (e) {
+    if (e.target.tagName === "INPUT" && e.target.id !== "data") {
+        let v = e.target.value.replace(/\D/g, "");
+        if (v.length > 8) v = v.slice(0, 8);
+        if (v.length >= 5) {
+            e.target.value = `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`;
+        } else if (v.length >= 3) {
+            e.target.value = `${v.slice(0, 2)}/${v.slice(2)}`;
+        } else {
+            e.target.value = v;
+        }
+    }
+});
+
+window.addEventListener('scroll', function() {
+    if (fp && fp.isOpen) {
+        fp.close();
+    }
+}, true);
 
 atualizarResumo();

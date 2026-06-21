@@ -3,9 +3,11 @@
 
 <head>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aurum | Gestão</title>
+    <link rel="icon" type="image/png" href="img/aurum-favicon.png">
     <link rel="stylesheet" href="css/gestao.css">
 </head>
 
@@ -64,7 +66,10 @@
             </div>
             <div class="campo">
                 <label>Data</label>
-                <input type="date" id="data">
+                <div id="calendario-container" class="wrapper-calendario">
+                    <input type="text" id="data" placeholder="dd/mm/aaaa" data-input>
+                    <span class="material-symbols-outlined icone-calendario" data-toggle>calendar_month</span>
+                </div>
             </div>
             <div class="campo">
                 <label>Descrição</label>
@@ -93,16 +98,40 @@
     </div>
 </div>
 
+<div id="modal-dashboard" class="modal">
+    <div class="modal-dashboard-content">
+        <h2>Dashboard Financeiro</h2>
+    </div>
+</div>
+
 <div class="container">
     <header>
         <div class="titulo-pagina">
-            <img src="img/aurum-logo.png" alt="Logo Aurum">
-            <a href="dashboard.html" class="voltar-dashboard">
-                ❮ Dashboard
-            </a>
+            <img
+                    src="img/aurum-logo.png"
+                    alt="Logo Aurum"
+                    draggable="false"
+            >
         </div>
-        <div class="usuario" id="usuario-nome">
-            Olá
+        <div class="usuario-container">
+            <button class="usuario" id="usuario-btn">
+                <span id="usuario-nome">Olá</span>
+                ▼
+            </button>
+            <div class="menu-usuario" id="menu-usuario">
+                <button id="ver-perfil">
+                    <span class="material-symbols-outlined icone-menu">person</span>
+                    Ver perfil
+                </button>
+                <button id="trocar-tema">
+                    <span class="material-symbols-outlined icone-menu">dark_mode</span>
+                    Mudar tema
+                </button>
+                <button id="logout">
+                    <span class="material-symbols-outlined icone-menu">logout</span>
+                    Logout
+                </button>
+            </div>
         </div>
     </header>
     <section class="resumo-financeiro">
@@ -120,9 +149,26 @@
         </div>
     </section>
     <section class="acoes">
-        <button id="abrir-modal">
-            Nova transação
-        </button>
+       <div class="wrapper-botoes-acao">
+            <button id="abrir-modal">
+                Nova Transação
+            </button>
+            <div class="card-dash-preview" id="abrir-dashboard" title="Dashboard">
+                <div class="cdp-esquerda">
+                    <span class="material-symbols-outlined cdp-icone">monitoring</span>
+                    <div class="cdp-textos">
+                        <span class="cdp-titulo">Dashboard</span>
+                        <span class="cdp-subtitulo">Resumo financeiro</span>
+                    </div>
+                </div>
+                <div class="cdp-direita">
+                    <div class="mini-barra barra-1"></div>
+                    <div class="mini-barra barra-2"></div>
+                    <div class="mini-barra barra-3"></div>
+                    <div class="mini-barra barra-4"></div>
+                </div>
+            </div>
+        </div>
     </section>
     <section class="lista-transacoes">
         <h2>Transações</h2>
@@ -142,6 +188,9 @@
         </table>
     </section>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 
 <script src="js/gestao.js"></script>
 

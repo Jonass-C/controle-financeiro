@@ -43,7 +43,8 @@ body {
 .login-container {
     position: relative;
     z-index: 10;
-    overflow: hidden;
+    overflow-y: auto;
+    max-height: 85vh;
     background: rgba(26, 26, 26, 0.85);
     width: 400px;
     padding: 45px;
@@ -147,4 +148,29 @@ button:hover {
     text-align: center;
     font-size: 14px;
     font-weight: bold;
+}
+
+img{
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.login-container::-webkit-scrollbar{
+    width:10px;
+}
+
+.login-container::-webkit-scrollbar-track{
+    background:transparent;
+    margin-top:20px;
+    margin-bottom:20px;
+}
+
+.login-container::-webkit-scrollbar-thumb{
+    background:#2A2A2A;
+    border-radius:10px;
+    border:3px solid rgba(26,26,26,.85);
+}
+
+.login-container::-webkit-scrollbar-thumb:hover{
+    background:#00C853;
 }
