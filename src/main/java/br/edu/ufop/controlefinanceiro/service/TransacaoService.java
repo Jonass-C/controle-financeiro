@@ -1,6 +1,6 @@
 package br.edu.ufop.controlefinanceiro.service;
 
-import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoCriarRequest;
+import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoFormRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoResponse;
 import br.edu.ufop.controlefinanceiro.domain.Transacao;
 import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
@@ -21,21 +21,8 @@ public class TransacaoService {
     private final TransacaoRepository transacaoRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public void criarTransacao(TransacaoCriarRequest request){
-        if(request.getData().isAfter(LocalDate.now().plusYears(5))) {
-            throw new RegraDeNegocioException("A data não pode ser superior a cinco anos.");
-        }
-        if(request.getData().isBefore(LocalDate.now().minusYears(5))) {
-            throw new RegraDeNegocioException("A data não pode ser inferior a cinco anos.");
-        }
-
-        if(request.getValor() <= 0.0) {
-            throw new RegraDeNegocioException("O valor deve ser positivo.");
-        }
-
-        if(!transacaoRepository.existsByCategoria(request.getCategoria())) {
-            throw new RegraDeNegocioException("Selecione uma categoria existente.");
-        }
+    public void criarTransacao(TransacaoFormRequest request){
+        validarDataEValor(request.getData(), request.getValor());
 
         if(!usuarioRepository.existsById(request.getUsuarioId())) {
             throw new RegraDeNegocioException("Usuário inexistente.");
@@ -58,21 +45,8 @@ public class TransacaoService {
         transacaoRepository.deleteById(idTransacao);
     }
 
-    public void editarTransacao(Integer id, @Valid TransacaoCriarRequest request){
-        if(request.getData().isAfter(LocalDate.now().plusYears(5))) {
-            throw new RegraDeNegocioException("A data não pode ser superior a cinco anos.");
-        }
-        if(request.getData().isBefore(LocalDate.now().minusYears(5))) {
-            throw new RegraDeNegocioException("A data não pode ser inferior a cinco anos.");
-        }
-
-        if(request.getValor() <= 0.0) {
-            throw new RegraDeNegocioException("O valor deve ser positivo.");
-        }
-
-        if(!transacaoRepository.existsByCategoria(request.getCategoria())) {
-            throw new RegraDeNegocioException("Selecione uma categoria existente.");
-        }
+    public void editarTransacao(Integer id, @Valid TransacaoFormRequest request){
+        validarDataEValor(request.getData(), request.getValor());
 
         if(!usuarioRepository.existsById(request.getUsuarioId())) {
             throw new RegraDeNegocioException("Usuário inexistente.");
@@ -90,27 +64,44 @@ public class TransacaoService {
         transacaoRepository.save(transacao);
     }
 
-    public List<TransacaoResponse> listarTransacao(Integer idUsuario){
-        if(!usuarioRepository.existsById(idUsuario)){
+    public List<TransacaoResponse> listarTransacao(Integer idUsuario) {
+        if (!usuarioRepository.existsById(idUsuario)) {
             throw new RegraDeNegocioException("Usuário inexistente.");
         }
 
         List<Transacao> transacoes = transacaoRepository.findTransacaoByUsuarioId(idUsuario);
         List<TransacaoResponse> listaResponse = new ArrayList<>();
 
-        for (Transacao transacao : transacoes){
-            TransacaoResponse response = new TransacaoResponse(
-                    transacao.getId(),
-                    transacao.getTitulo(),
-                    transacao.getData(),
-                    transacao.getValor(),
-                    transacao.getCategoria(),
-                    transacao.getTipo(),
-                    transacao.getUsuarioId(),
-                    transacao.getDescricao()
-            );
-            listaResponse.add(response);
+        for (Transacao transacao : transacoes) {
+            listaResponse.add(converterParaResponse(transacao));
         }
+
         return listaResponse;
+    }
+
+    private TransacaoResponse converterParaResponse(Transacao transacao) {
+        return new TransacaoResponse(
+                transacao.getId(),
+                transacao.getTitulo(),
+                transacao.getData(),
+                transacao.getValor(),
+                transacao.getCategoria(),
+                transacao.getTipo(),
+                transacao.getUsuarioId(),
+                transacao.getDescricao()
+        );
+    }
+
+    public void validarDataEValor(LocalDate data, double valor){
+        if(data.isAfter(LocalDate.now().plusYears(5))) {
+            throw new RegraDeNegocioException("A data não pode ser superior a cinco anos.");
+        }
+        if(data.isBefore(LocalDate.now().minusYears(5))) {
+            throw new RegraDeNegocioException("A data não pode ser inferior a cinco anos.");
+        }
+
+        if(valor <= 0.0) {
+            throw new RegraDeNegocioException("O valor deve ser positivo.");
+        }
     }
 }

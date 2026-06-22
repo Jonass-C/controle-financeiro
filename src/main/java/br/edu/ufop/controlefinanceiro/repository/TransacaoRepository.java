@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface TransacaoRepository extends JpaRepository<Transacao, Integer> {
 
-    boolean existsByCategoria(String categoria);
     List<Transacao> findTransacaoByUsuarioId(Integer idUsuario);
 
 }

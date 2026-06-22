@@ -1,6 +1,5 @@
 package br.edu.ufop.controlefinanceiro.controller.dto;
 
-
 import br.edu.ufop.controlefinanceiro.domain.enums.Tipo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +11,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class TransacaoEditarRequest {
+public class TransacaoFormRequest {
     @NotBlank(message = "Informe o título da transação.")
     @Size(max = 255, message = "O título deve ter no máximo 255 caracteres.")
     private String titulo;
