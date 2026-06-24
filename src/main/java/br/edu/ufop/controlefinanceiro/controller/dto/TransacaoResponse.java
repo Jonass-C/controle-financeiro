@@ -13,8 +13,8 @@ public class TransacaoResponse {
     private String titulo;
     private LocalDate data;
     private Double valor;
-    private String categoria;
     private Tipo tipo;
-    private Integer usuarioId;
     private String descricao;
+    private Integer categoriaId;
+    private Integer usuarioId;
 }

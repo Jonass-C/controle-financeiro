@@ -32,10 +32,10 @@ public class TransacaoService {
                 .titulo(request.getTitulo())
                 .data(request.getData())
                 .valor(request.getValor())
-                .categoria(request.getCategoria())
                 .tipo(request.getTipo())
-                .usuarioId(request.getUsuarioId())
                 .descricao(request.getDescricao())
+                .categoriaId(request.getCategoriaId())
+                .usuarioId(request.getUsuarioId())
                 .build();
 
         transacaoRepository.save(transacao);
@@ -57,9 +57,9 @@ public class TransacaoService {
         transacao.setTitulo(request.getTitulo());
         transacao.setData(request.getData());
         transacao.setValor(request.getValor());
-        transacao.setCategoria(request.getCategoria());
         transacao.setTipo(request.getTipo());
         transacao.setDescricao(request.getDescricao());
+        transacao.setCategoriaId(request.getCategoriaId());
 
         transacaoRepository.save(transacao);
     }
@@ -85,10 +85,10 @@ public class TransacaoService {
                 transacao.getTitulo(),
                 transacao.getData(),
                 transacao.getValor(),
-                transacao.getCategoria(),
                 transacao.getTipo(),
-                transacao.getUsuarioId(),
-                transacao.getDescricao()
+                transacao.getDescricao(),
+                transacao.getCategoriaId(),
+                transacao.getUsuarioId()
         );
     }
 
