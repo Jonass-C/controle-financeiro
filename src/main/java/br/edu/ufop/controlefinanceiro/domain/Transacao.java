@@ -38,19 +38,21 @@ public class Transacao {
     @Column(name = "valor", nullable = false)
     private Double valor;
 
-    @NotBlank(message = "Informe a categoria da transação.")
-    @Size(max = 64, message = "A categoria deve ter no máximo 64 caracteres.")
-    @Column(name = "categoria", nullable = false, length = 64)
-    private String categoria;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false, length = 30)
     private Tipo tipo;
 
-    @Column(name = "usuario_id", nullable = false)
-    private Integer usuarioId;
-
     @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
     @Column(name = "descricao", length = 255)
     private String descricao;
+
+    @NotNull(message = "Informe a categoria.")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
+
+    @NotNull(message = "Informe o usuário.")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 }

@@ -30,14 +30,14 @@ public class TransacaoController {
         return ResponseEntity.ok(transacoes);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<String> editar(@PathVariable Integer id, @Valid @RequestBody TransacaoFormRequest request){
-        transacaoService.editarTransacao(id, request);
+    public ResponseEntity<String> editar(@PathVariable("id") Integer idTransacao, @Valid @RequestBody TransacaoFormRequest request){
+        transacaoService.editarTransacao(idTransacao, request);
         return ResponseEntity.status(HttpStatus.CREATED).body("Transação editada com sucesso!");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id){
-        transacaoService.excluirTransacao(id);
+    public ResponseEntity<Void> excluir(@PathVariable("id") Integer idTransacao){
+        transacaoService.excluirTransacao(idTransacao);
         return ResponseEntity.noContent().build();
     }
 }

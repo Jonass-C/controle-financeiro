@@ -58,3 +58,58 @@ Content-Type: application/json
   "senhaPura": "123",
   "confirmacaoSenha": ""
 }
+
+### Teste 7: Criar uma Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
+POST http://localhost:8080/transacoes
+Content-Type: application/json
+
+{
+  "titulo": "Pão",
+  "data": "2026-06-24",
+  "valor": 20,
+  "tipo": "DESPESA",
+  "descricao": "pãozin",
+  "categoriaId": 1,
+  "usuarioId": 1
+}
+
+### Teste 8: Editar uma Transação
+PUT http://localhost:8080/transacoes/1
+Content-Type: application/json
+
+{
+  "titulo": "Pãozin de queijo",
+  "data": "2026-06-24",
+  "valor": 20.0,
+  "tipo": "DESPESA",
+  "descricao": "pãozin de queijo",
+  "categoriaId": 1,
+  "usuarioId": 1
+}
+
+### Teste 9: Criar outra Transação ### Teste 7: Criar uma Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
+POST http://localhost:8080/transacoes
+Content-Type: application/json
+
+{
+  "titulo": "Busão",
+  "data": "2026-06-24",
+  "valor": 16.50,
+  "tipo": "DESPESA",
+  "descricao": "",
+  "categoriaId": 3,
+  "usuarioId": 1
+}
+
+### Teste 10: Listar Transações do Usuário 1
+GET http://localhost:8080/transacoes?idUsuario=1
+Content-Type: application/json
+
+{
+  "usuarioId": 1
+}
+
+### Teste 11: Excluir a Transação 2
+DELETE http://localhost:8080/transacoes/2
+Content-Type: application/json
+

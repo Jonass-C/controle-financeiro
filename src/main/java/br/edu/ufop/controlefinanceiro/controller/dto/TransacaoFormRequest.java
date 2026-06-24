@@ -22,16 +22,16 @@ public class TransacaoFormRequest {
     @NotNull(message = "Informe o valor da transação.")
     private Double valor;
 
-    @NotBlank(message = "Informe a categoria da transação.")
-    @Size(max = 64, message = "A categoria deve ter no máximo 64 caracteres.")
-    private String categoria;
-
     @NotNull(message = "Informe o tipo da transação.")
     private Tipo tipo;
 
-    @NotNull(message = "O ID do usuário é obrigatório.")
-    private Integer usuarioId;
-
     @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
     private String descricao;
+
+    @NotNull(message = "O ID da categoria é obrigatório.")
+    private Integer categoriaId;
+
+    // TODO: remover este atributo daqui e fazer a autenticação/sessão seguindo boas práticas de segurança
+    @NotNull(message = "O ID do usuário é obrigatório.")
+    private Integer usuarioId;
 }
