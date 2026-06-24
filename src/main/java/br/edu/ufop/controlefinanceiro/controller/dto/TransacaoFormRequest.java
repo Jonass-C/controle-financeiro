@@ -31,6 +31,7 @@ public class TransacaoFormRequest {
     @NotNull(message = "O ID da categoria é obrigatório.")
     private Integer categoriaId;
 
+    // TODO: remover este atributo daqui e fazer a autenticação/sessão seguindo boas práticas de segurança
     @NotNull(message = "O ID do usuário é obrigatório.")
     private Integer usuarioId;
 }

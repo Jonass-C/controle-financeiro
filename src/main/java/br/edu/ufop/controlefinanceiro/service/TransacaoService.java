@@ -2,8 +2,11 @@ package br.edu.ufop.controlefinanceiro.service;
 
 import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoFormRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoResponse;
+import br.edu.ufop.controlefinanceiro.domain.Categoria;
 import br.edu.ufop.controlefinanceiro.domain.Transacao;
+import br.edu.ufop.controlefinanceiro.domain.Usuario;
 import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
+import br.edu.ufop.controlefinanceiro.repository.CategoriaRepository;
 import br.edu.ufop.controlefinanceiro.repository.TransacaoRepository;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
 import jakarta.validation.Valid;
@@ -20,13 +23,16 @@ public class TransacaoService {
 
     private final TransacaoRepository transacaoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final CategoriaRepository categoriaRepository;
 
     public void criarTransacao(TransacaoFormRequest request){
         validarDataEValor(request.getData(), request.getValor());
 
-        if(!usuarioRepository.existsById(request.getUsuarioId())) {
-            throw new RegraDeNegocioException("Usuário inexistente.");
-        }
+        Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado."));
+
+        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+                .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         Transacao transacao = Transacao.builder()
                 .titulo(request.getTitulo())
@@ -34,8 +40,8 @@ public class TransacaoService {
                 .valor(request.getValor())
                 .tipo(request.getTipo())
                 .descricao(request.getDescricao())
-                .categoriaId(request.getCategoriaId())
-                .usuarioId(request.getUsuarioId())
+                .categoria(categoria)
+                .usuario(usuario)
                 .build();
 
         transacaoRepository.save(transacao);
@@ -49,27 +55,33 @@ public class TransacaoService {
         validarDataEValor(request.getData(), request.getValor());
 
         if(!usuarioRepository.existsById(request.getUsuarioId())) {
-            throw new RegraDeNegocioException("Usuário inexistente.");
+            throw new RegraDeNegocioException("Usuário não encontrado.");
         }
+
         Transacao transacao = transacaoRepository.findById(id)
-                .orElseThrow(()->new RegraDeNegocioException("Transação não existe."));
+                .orElseThrow(()->new RegraDeNegocioException("Transação não encontrada."));
+
+        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+                .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         transacao.setTitulo(request.getTitulo());
         transacao.setData(request.getData());
         transacao.setValor(request.getValor());
         transacao.setTipo(request.getTipo());
         transacao.setDescricao(request.getDescricao());
-        transacao.setCategoriaId(request.getCategoriaId());
+        transacao.setCategoria(categoria);
 
         transacaoRepository.save(transacao);
     }
 
     public List<TransacaoResponse> listarTransacao(Integer idUsuario) {
         if (!usuarioRepository.existsById(idUsuario)) {
-            throw new RegraDeNegocioException("Usuário inexistente.");
+            throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        List<Transacao> transacoes = transacaoRepository.findTransacaoByUsuarioId(idUsuario);
+        // TODO: Substituir este idUsuario recebido por parâmetro pela extração nativa do Token/Sessão do usuário logado
+
+        List<Transacao> transacoes = transacaoRepository.findByUsuarioIdOrderByDataDesc(idUsuario);
         List<TransacaoResponse> listaResponse = new ArrayList<>();
 
         for (Transacao transacao : transacoes) {
@@ -87,8 +99,8 @@ public class TransacaoService {
                 transacao.getValor(),
                 transacao.getTipo(),
                 transacao.getDescricao(),
-                transacao.getCategoriaId(),
-                transacao.getUsuarioId()
+                transacao.getCategoria().getId(),
+                transacao.getUsuario().getId()
         );
     }
 

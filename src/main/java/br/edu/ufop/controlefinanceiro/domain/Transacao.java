@@ -46,9 +46,13 @@ public class Transacao {
     @Column(name = "descricao", length = 255)
     private String descricao;
 
-    @Column(name = "categoria_id", nullable = false)
-    private Integer categoriaId;
+    @NotNull(message = "Informe a categoria.")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
 
-    @Column(name = "usuario_id", nullable = false)
-    private Integer usuarioId;
+    @NotNull(message = "Informe o usuário.")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 }
