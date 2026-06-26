@@ -87,7 +87,7 @@ Content-Type: application/json
   "usuarioId": 1
 }
 
-### Teste 9: Criar outra Transação ### Teste 7: Criar uma Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
+### Teste 9: Criar outra Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
 POST http://localhost:8080/transacoes
 Content-Type: application/json
 
@@ -105,11 +105,6 @@ Content-Type: application/json
 GET http://localhost:8080/transacoes?idUsuario=1
 Content-Type: application/json
 
-{
-  "usuarioId": 1
-}
-
 ### Teste 11: Excluir a Transação 2
 DELETE http://localhost:8080/transacoes/2
 Content-Type: application/json
-
