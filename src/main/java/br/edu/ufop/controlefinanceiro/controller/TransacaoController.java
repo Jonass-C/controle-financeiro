@@ -19,25 +19,25 @@ public class TransacaoController {
     private final TransacaoService transacaoService;
 
     @PostMapping
-    public ResponseEntity<String> criar(@Valid @RequestBody TransacaoFormRequest request){
-        transacaoService.criarTransacao(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Transação cadastrada com sucesso!");
+    public ResponseEntity<TransacaoResponse> criar(@Valid @RequestBody TransacaoFormRequest request){
+        TransacaoResponse transacoes = transacaoService.criar(request);
+        return ResponseEntity.ok(transacoes);
     }
 
     @GetMapping
     public ResponseEntity<List<TransacaoResponse>> listar(@RequestParam Integer idUsuario){
-        List<TransacaoResponse> transacoes = transacaoService.listarTransacao(idUsuario);
+        List<TransacaoResponse> transacoes = transacaoService.listar(idUsuario);
         return ResponseEntity.ok(transacoes);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<String> editar(@PathVariable("id") Integer idTransacao, @Valid @RequestBody TransacaoFormRequest request){
-        transacaoService.editarTransacao(idTransacao, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Transação editada com sucesso!");
+    public ResponseEntity<TransacaoResponse> editar(@PathVariable("id") Integer idTransacao, @Valid @RequestBody TransacaoFormRequest request){
+        TransacaoResponse response = transacaoService.editar(idTransacao, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable("id") Integer idTransacao){
-        transacaoService.excluirTransacao(idTransacao);
+        transacaoService.excluir(idTransacao);
         return ResponseEntity.noContent().build();
     }
 }

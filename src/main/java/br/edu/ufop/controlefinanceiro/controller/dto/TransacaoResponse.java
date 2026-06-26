@@ -17,6 +17,6 @@ public class TransacaoResponse {
     private Double valor;
     private Tipo tipo;
     private String descricao;
-    private Integer categoriaId;
+    private String categoriaNome;
     private Integer usuarioId;
 }

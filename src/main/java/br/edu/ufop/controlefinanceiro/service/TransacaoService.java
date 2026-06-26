@@ -25,7 +25,7 @@ public class TransacaoService {
     private final UsuarioRepository usuarioRepository;
     private final CategoriaRepository categoriaRepository;
 
-    public void criarTransacao(TransacaoFormRequest request){
+    public TransacaoResponse criar(TransacaoFormRequest request){
         validarDataEValor(request.getData(), request.getValor());
 
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
@@ -44,14 +44,28 @@ public class TransacaoService {
                 .usuario(usuario)
                 .build();
 
-        transacaoRepository.save(transacao);
+        Transacao transacaoSalva = transacaoRepository.save(transacao);
+        return converterParaResponse(transacaoSalva);
     }
 
-    public void excluirTransacao(Integer idTransacao){
-        transacaoRepository.deleteById(idTransacao);
+    public List<TransacaoResponse> listar(Integer idUsuario) {
+        if (!usuarioRepository.existsById(idUsuario)) {
+            throw new RegraDeNegocioException("Usuário não encontrado.");
+        }
+
+        // TODO: Substituir este idUsuario recebido por parâmetro pela extração nativa do Token/Sessão do usuário logado
+
+        List<Transacao> transacoes = transacaoRepository.findByUsuarioIdOrderByDataDesc(idUsuario);
+        List<TransacaoResponse> listaResponse = new ArrayList<>();
+
+        for (Transacao transacao : transacoes) {
+            listaResponse.add(converterParaResponse(transacao));
+        }
+
+        return listaResponse;
     }
 
-    public void editarTransacao(Integer id, @Valid TransacaoFormRequest request){
+    public TransacaoResponse editar(Integer id, @Valid TransacaoFormRequest request){
         validarDataEValor(request.getData(), request.getValor());
 
         if(!usuarioRepository.existsById(request.getUsuarioId())) {
@@ -71,24 +85,12 @@ public class TransacaoService {
         transacao.setDescricao(request.getDescricao());
         transacao.setCategoria(categoria);
 
-        transacaoRepository.save(transacao);
+        Transacao transacaoSalva = transacaoRepository.save(transacao);
+        return converterParaResponse(transacaoSalva);
     }
 
-    public List<TransacaoResponse> listarTransacao(Integer idUsuario) {
-        if (!usuarioRepository.existsById(idUsuario)) {
-            throw new RegraDeNegocioException("Usuário não encontrado.");
-        }
-
-        // TODO: Substituir este idUsuario recebido por parâmetro pela extração nativa do Token/Sessão do usuário logado
-
-        List<Transacao> transacoes = transacaoRepository.findByUsuarioIdOrderByDataDesc(idUsuario);
-        List<TransacaoResponse> listaResponse = new ArrayList<>();
-
-        for (Transacao transacao : transacoes) {
-            listaResponse.add(converterParaResponse(transacao));
-        }
-
-        return listaResponse;
+    public void excluir(Integer idTransacao){
+        transacaoRepository.deleteById(idTransacao);
     }
 
     private TransacaoResponse converterParaResponse(Transacao transacao) {
@@ -99,7 +101,7 @@ public class TransacaoService {
                 transacao.getValor(),
                 transacao.getTipo(),
                 transacao.getDescricao(),
-                transacao.getCategoria().getId(),
+                transacao.getCategoria().getNome(),
                 transacao.getUsuario().getId()
         );
     }

@@ -2,6 +2,7 @@ package br.edu.ufop.controlefinanceiro.service;
 
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioCadastroRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioLoginRequest;
+import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioResponse;
 import br.edu.ufop.controlefinanceiro.domain.Usuario;
 import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
@@ -16,7 +17,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final CryptoService cryptoService;
 
-    public void cadastrarUsuario(UsuarioCadastroRequest request) {
+    public UsuarioResponse cadastrar(UsuarioCadastroRequest request) {
         if (!request.getSenhaPura().equals(request.getConfirmacaoSenha())) {
             throw new RegraDeNegocioException("As senhas não coincidem.");
         }
@@ -35,10 +36,12 @@ public class UsuarioService {
                 .salt(salt)
                 .build();
 
-        usuarioRepository.save(usuario);
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        return new UsuarioResponse(usuarioSalvo.getId(), usuarioSalvo.getIdentificadorLogin());
     }
 
-    public Usuario autenticarUsuario(UsuarioLoginRequest request) {
+    public UsuarioResponse autenticar(UsuarioLoginRequest request) {
         Usuario usuario = usuarioRepository.findByIdentificadorLogin(request.getIdentificadorLogin())
                 .orElseThrow(() -> new RegraDeNegocioException("Identificador ou senha incorretos."));
 
@@ -47,6 +50,6 @@ public class UsuarioService {
             throw new RegraDeNegocioException("Identificador ou senha incorretos.");
         }
 
-        return usuario;
+        return new UsuarioResponse(usuario.getId(), usuario.getIdentificadorLogin());
     }
 }

@@ -22,19 +22,14 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @PostMapping("/cadastro")
-    public ResponseEntity<String> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request) {
-        usuarioService.cadastrarUsuario(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário cadastrado com sucesso!");
+    public ResponseEntity<UsuarioResponse> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request) {
+        UsuarioResponse response = usuarioService.cadastrar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody UsuarioLoginRequest request) {
-        Usuario usuarioLogado = usuarioService.autenticarUsuario(request);
-
-        UsuarioResponse response = new UsuarioResponse(
-                usuarioLogado.getId(),
-                usuarioLogado.getIdentificadorLogin()
-        );
+        UsuarioResponse response = usuarioService.autenticar(request);
 
         return ResponseEntity.ok(response);
     }
