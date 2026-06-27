@@ -1,19 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-/* RESET */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* BODY */
+:root{
+    --bg-overlay1: rgba(15,15,15,.50);
+    --bg-overlay2: rgba(15,15,15,.70);
+    --background-image: url("../img/background.png");
+    --grid: rgba(255,255,255,.02);
+    --texto: #FFFFFF;
+    --texto-secundario: #B3B3B3;
+    --container: rgba(26,26,26,.85);
+    --input: #0F0F0F;
+    --borda: #2A2A2A;
+    --verde: #00C853;
+    --verde-hover: #5EFC82;
+    --sombra: rgba(0,200,83,.15);
+}
+
+body.light{
+    --bg-overlay1: rgba(255,255,255,.55);
+    --bg-overlay2: rgba(255,255,255,.75);
+    --background-image: url("../img/backgroundclaro.png");
+    --grid: rgba(0,0,0,.05);
+    --texto: #222222;
+    --texto-secundario: #666666;
+    --container: rgba(255,255,255,.90);
+    --input: #F7F7F7;
+    --borda: #D5D5D5;
+    --verde: #00C853;
+    --verde-hover: #00A944;
+    --sombra: rgba(0,200,83,.20);
+}
+
 body {
     background:
-            linear-gradient(rgba(15,15,15,0.50), rgba(15,15,15,0.70)),
-            url("../img/background.png"),
-            linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            linear-gradient(var(--bg-overlay1), var(--bg-overlay2)),
+            var(--background-image),
+            linear-gradient(var(--grid) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid) 1px, transparent 1px);
     background-size:
             cover,
             cover,
@@ -30,7 +58,7 @@ body {
             repeat,
             repeat;
     font-family: 'Poppins', sans-serif;
-    color: white;
+    color: var(--texto);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -39,19 +67,18 @@ body {
     position: relative;
 }
 
-/* CONTAINER */
 .login-container {
     position: relative;
     z-index: 10;
     overflow-y: auto;
     max-height: 85vh;
-    background: rgba(26, 26, 26, 0.85);
+    background: var(--container);
     width: 400px;
     padding: 45px;
     border-radius: 16px;
-    border: 1px solid #2A2A2A;
+    border: 1px solid var(--borda);
     backdrop-filter: blur(12px);
-    box-shadow: 0 0 30px rgba(0, 200, 83, 0.15);
+    box-shadow: 0 0 30px var(--sombra);
 }
 
 .logo {
@@ -74,7 +101,7 @@ h1 {
 }
 
 .subtitulo {
-    color: #B3B3B3;
+    color: var(--texto-secundario);
     text-align: center;
     margin-bottom: 35px;
 }
@@ -92,17 +119,17 @@ label {
 
 input {
     padding: 14px;
-    background-color: #0F0F0F;
-    border: 1px solid #2A2A2A;
+    background-color: var(--input);
+    border: 1px solid var(--borda);
     border-radius: 10px;
-    color: white;
+    color: var(--texto);
     font-size: 15px;
     transition: 0.3s;
 }
 
 input:focus {
     outline: none;
-    border-color: #00C853;
+    border-color: var(--verde);
     box-shadow: 0 0 10px rgba(0, 200, 83, 0.2);
 }
 
@@ -110,7 +137,7 @@ button {
     width: 100%;
     padding: 14px;
     margin-top: 10px;
-    background-color: #00C853;
+    background-color: var(--verde);
     color: white;
     border: none;
     border-radius: 10px;
@@ -121,24 +148,23 @@ button {
 }
 
 button:hover {
-    background-color: #5EFC82;
+    background-color: var(--verde-hover);
 }
 
 .cadastro-link {
     margin-top: 25px;
     text-align: center;
-    color: #B3B3B3;
+    color: var(--texto-secundario);
 }
 
 .cadastro-link a {
-    color: #00C853;
+    color: var(--verde);
     text-decoration: none;
     font-weight: 500;
 }
 
 .cadastro-link a:hover {
-    color: #5EFC82;
-
+    color: var(--verde-hover);
 }
 
 #mensagem {
@@ -150,27 +176,27 @@ button:hover {
     font-weight: bold;
 }
 
-img{
+img {
     user-select: none;
     -webkit-user-drag: none;
 }
 
-.login-container::-webkit-scrollbar{
-    width:10px;
+.login-container::-webkit-scrollbar {
+    width: 10px;
 }
 
-.login-container::-webkit-scrollbar-track{
-    background:transparent;
-    margin-top:20px;
-    margin-bottom:20px;
+.login-container::-webkit-scrollbar-track {
+    background: transparent;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-.login-container::-webkit-scrollbar-thumb{
-    background:#2A2A2A;
-    border-radius:10px;
-    border:3px solid rgba(26,26,26,.85);
+.login-container::-webkit-scrollbar-thumb {
+    background: var(--borda);
+    border-radius: 10px;
+    border: 3px solid var(--container);
 }
 
-.login-container::-webkit-scrollbar-thumb:hover{
-    background:#00C853;
+.login-container::-webkit-scrollbar-thumb:hover {
+    background: var(--verde);
 }
