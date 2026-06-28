@@ -1,6 +1,5 @@
 package br.edu.ufop.controlefinanceiro.controller;
 
-import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioCadastroRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioLoginRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioResponse;
@@ -23,34 +22,15 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @PostMapping("/cadastro")
-    public ResponseEntity<String> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request) {
-        usuarioService.cadastrarUsuario(
-                request.getNome(),
-                request.getIdentificadorLogin(),
-                request.getSenhaPura(),
-                request.getConfirmacaoSenha()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário cadastrado com sucesso!");
+    public ResponseEntity<UsuarioResponse> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request) {
+        UsuarioResponse response = usuarioService.cadastrar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@Valid @RequestBody UsuarioLoginRequest request) {
-        try {
-            Usuario usuarioLogado = usuarioService.autenticarUsuario(
-                    request.getIdentificadorLogin(),
-                    request.getSenhaPura()
-            );
+    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody UsuarioLoginRequest request) {
+        UsuarioResponse response = usuarioService.autenticar(request);
 
-            UsuarioResponse response = new UsuarioResponse(
-                    usuarioLogado.getId(),
-                    usuarioLogado.getIdentificadorLogin()
-            );
-
-            return ResponseEntity.ok(response);
-
-        } catch (RegraDeNegocioException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(response);
     }
 }
