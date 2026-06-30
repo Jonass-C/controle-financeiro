@@ -9,4 +9,5 @@ public class UsuarioResponse {
 
     private Integer id;
     private String identificadorLogin;
+    private String nome;
 }

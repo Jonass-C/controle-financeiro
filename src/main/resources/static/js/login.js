@@ -34,6 +34,7 @@ form.addEventListener("submit", function (event) {
 
             localStorage.setItem("usuarioId", usuarioLogado.id);
             localStorage.setItem("usuarioIdentificador", usuarioLogado.identificadorLogin);
+            localStorage.setItem("nomeUsuario", usuarioLogado.nome);
 
             setTimeout(() => {
                 window.location.href = "gestao.html";

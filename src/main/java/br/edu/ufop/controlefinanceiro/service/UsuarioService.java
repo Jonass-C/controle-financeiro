@@ -38,7 +38,7 @@ public class UsuarioService {
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
-        return new UsuarioResponse(usuarioSalvo.getId(), usuarioSalvo.getIdentificadorLogin());
+        return new UsuarioResponse(usuarioSalvo.getId(), usuarioSalvo.getIdentificadorLogin(), usuarioSalvo.getNome());
     }
 
     public UsuarioResponse autenticar(UsuarioLoginRequest request) {
@@ -50,6 +50,6 @@ public class UsuarioService {
             throw new RegraDeNegocioException("Identificador ou senha incorretos.");
         }
 
-        return new UsuarioResponse(usuario.getId(), usuario.getIdentificadorLogin());
+        return new UsuarioResponse(usuario.getId(), usuario.getIdentificadorLogin(), usuario.getNome());
     }
 }
