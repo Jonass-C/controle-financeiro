@@ -69,7 +69,7 @@ Content-Type: application/json
   "valor": 20,
   "tipo": "DESPESA",
   "descricao": "pãozin",
-  "categoriaId": 1,
+  "categoriaNome": "Alimentação",
   "usuarioId": 1
 }
 
@@ -83,7 +83,7 @@ Content-Type: application/json
   "valor": 20.0,
   "tipo": "DESPESA",
   "descricao": "pãozin de queijo",
-  "categoriaId": 1,
+  "categoriaNome": "Lazer",
   "usuarioId": 1
 }
 
@@ -97,7 +97,7 @@ Content-Type: application/json
   "valor": 16.50,
   "tipo": "DESPESA",
   "descricao": "",
-  "categoriaId": 3,
+  "categoriaNome": "Transporte",
   "usuarioId": 1
 }
 
@@ -108,3 +108,41 @@ Content-Type: application/json
 ### Teste 11: Excluir a Transação 2
 DELETE http://localhost:8080/transacoes/2
 Content-Type: application/json
+
+### Teste 12: Criar uma nova categoria personalizada
+POST http://localhost:8080/categorias
+Content-Type: application/json
+
+{
+  "nome": "Academia",
+  "usuarioId": 1
+}
+
+### Teste 13: Listar Categorias para Nova Transação (Globais + Usuário)
+GET http://localhost:8080/categorias?idUsuario=1
+Content-Type: application/json
+
+### Teste 14: Listar Categorias para Gestão (Apenas do Usuário com Contagem)
+GET http://localhost:8080/categorias/gestao?idUsuario=1
+Content-Type: application/json
+
+### Teste 15: Tentar criar uma categoria com nome duplicado (dá erro)
+POST http://localhost:8080/categorias
+Content-Type: application/json
+
+{
+  "nome": "Academia",
+  "usuarioId": 1
+}
+
+### Teste 16: Editar nome da Categoria (ID 10 = Academia -> Crossfit)
+PUT http://localhost:8080/categorias/10
+Content-Type: application/json
+
+{
+  "nome": "Crossfit",
+  "usuarioId": 1
+}
+
+### Teste 17: Excluir a Categoria (ID 10)
+DELETE http://localhost:8080/categorias/10?idUsuario=1

@@ -31,7 +31,7 @@ public class TransacaoService {
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado."));
 
-        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+        Categoria categoria = categoriaRepository.buscarPorNomeEUsuario(request.getCategoriaNome(), request.getUsuarioId())
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         Transacao transacao = Transacao.builder()
@@ -65,17 +65,17 @@ public class TransacaoService {
         return listaResponse;
     }
 
-    public TransacaoResponse editar(Integer id, @Valid TransacaoFormRequest request){
+    public TransacaoResponse editar(Integer idTransacao, @Valid TransacaoFormRequest request){
         validarDataEValor(request.getData(), request.getValor());
 
         if(!usuarioRepository.existsById(request.getUsuarioId())) {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        Transacao transacao = transacaoRepository.findById(id)
+        Transacao transacao = transacaoRepository.findById(idTransacao)
                 .orElseThrow(()->new RegraDeNegocioException("Transação não encontrada."));
 
-        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+        Categoria categoria = categoriaRepository.buscarPorNomeEUsuario(request.getCategoriaNome(), request.getUsuarioId())
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         transacao.setTitulo(request.getTitulo());
