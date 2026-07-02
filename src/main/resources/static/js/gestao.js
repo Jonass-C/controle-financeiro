@@ -62,8 +62,12 @@ usuarioBtn.addEventListener("click", function(){
 });
 
 document.getElementById("logout").addEventListener("click", function(){
-        localStorage.clear();
-        window.location.href="/";
+    const temaAtual = localStorage.getItem("tema");
+    localStorage.clear();
+    if (temaAtual) {
+        localStorage.setItem("tema", temaAtual);
+    }
+    window.location.href="/";
 });
 
 window.addEventListener("click", function(e){
@@ -205,6 +209,31 @@ form.addEventListener("submit", function(e){
             formularioValido = false;
         }
     }
+    const msgErroData = document.getElementById("erro-data-limite");
+    if (msgErroData) msgErroData.style.display = "none";
+
+    if (!data || (fp.selectedDates && fp.selectedDates.length === 0)) {
+        formularioValido = false;
+
+        if (document.getElementById("data")) document.getElementById("data").classList.add("erro-campo");
+        if (fp && fp.altInput) fp.altInput.classList.add("erro-campo");
+        if (fp && fp.input) fp.input.classList.add("erro-campo");
+    } else {
+        const anoSelecionado = fp.selectedDates[0].getFullYear();
+        const anoAtual = new Date().getFullYear();
+
+        if (anoSelecionado > anoAtual + 5 || anoSelecionado < anoAtual - 5) {
+            formularioValido = false;
+
+            if (msgErroData) {
+                msgErroData.style.display = "block";
+            }
+
+            if (fp && fp.altInput) fp.altInput.classList.add("erro-campo");
+            if (fp && fp.input) fp.input.classList.add("erro-campo");
+        }
+    }
+
     if(!formularioValido){
         return;
     }
