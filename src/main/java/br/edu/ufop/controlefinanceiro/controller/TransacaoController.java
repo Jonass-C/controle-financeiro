@@ -1,6 +1,6 @@
 package br.edu.ufop.controlefinanceiro.controller;
 
-import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoFormRequest;
+import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoResponse;
 import br.edu.ufop.controlefinanceiro.service.TransacaoService;
 import jakarta.validation.Valid;
@@ -19,25 +19,26 @@ public class TransacaoController {
     private final TransacaoService transacaoService;
 
     @PostMapping
-    public ResponseEntity<TransacaoResponse> criar(@Valid @RequestBody TransacaoFormRequest request){
-        TransacaoResponse transacoes = transacaoService.criar(request);
-        return ResponseEntity.ok(transacoes);
+    public ResponseEntity<TransacaoResponse> criar(@Valid @RequestBody TransacaoRequest request){
+        TransacaoResponse response = transacaoService.criar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<TransacaoResponse>> listar(@RequestParam Integer idUsuario){
-        List<TransacaoResponse> transacoes = transacaoService.listar(idUsuario);
-        return ResponseEntity.ok(transacoes);
+    public ResponseEntity<List<TransacaoResponse>> listar(@RequestParam Integer usuarioId){
+        List<TransacaoResponse> response = transacaoService.listar(usuarioId);
+        return ResponseEntity.ok(response);
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<TransacaoResponse> editar(@PathVariable("id") Integer idTransacao, @Valid @RequestBody TransacaoFormRequest request){
-        TransacaoResponse response = transacaoService.editar(idTransacao, request);
+    public ResponseEntity<TransacaoResponse> editar(@PathVariable("id") Integer transacaoId, @Valid @RequestBody TransacaoRequest request){
+        TransacaoResponse response = transacaoService.editar(transacaoId, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable("id") Integer idTransacao){
-        transacaoService.excluir(idTransacao);
+    public ResponseEntity<Void> excluir(@PathVariable("id") Integer transacaoId){
+        transacaoService.excluir(transacaoId);
         return ResponseEntity.noContent().build();
     }
 }

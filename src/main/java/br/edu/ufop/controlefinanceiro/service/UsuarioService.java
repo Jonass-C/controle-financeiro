@@ -1,7 +1,7 @@
 package br.edu.ufop.controlefinanceiro.service;
 
-import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioCadastroRequest;
-import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioLoginRequest;
+import br.edu.ufop.controlefinanceiro.controller.dto.CadastroRequest;
+import br.edu.ufop.controlefinanceiro.controller.dto.LoginRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioResponse;
 import br.edu.ufop.controlefinanceiro.domain.Usuario;
 import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
@@ -21,7 +21,7 @@ public class UsuarioService {
     private boolean devMode;
 
 
-    public UsuarioResponse cadastrar(UsuarioCadastroRequest request) {
+    public UsuarioResponse cadastrar(CadastroRequest request) {
         int tamanhoMinimo = devMode ? 1 : 6;
         if (request.getSenhaPura().length() < tamanhoMinimo) {
             throw new RegraDeNegocioException("A senha deve conter no mínimo " + tamanhoMinimo + " caracteres.");
@@ -50,7 +50,7 @@ public class UsuarioService {
         return new UsuarioResponse(usuarioSalvo.getId(), usuarioSalvo.getIdentificadorLogin());
     }
 
-    public UsuarioResponse autenticar(UsuarioLoginRequest request) {
+    public UsuarioResponse autenticar(LoginRequest request) {
         Usuario usuario = usuarioRepository.findByIdentificadorLogin(request.getIdentificadorLogin())
                 .orElseThrow(() -> new RegraDeNegocioException("Identificador ou senha incorretos."));
 

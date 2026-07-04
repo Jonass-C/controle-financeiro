@@ -26,26 +26,26 @@ public class CategoriaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoriaResponse>> listarEmTransacao(@RequestParam Integer idUsuario) {
-        List<CategoriaResponse> categorias = categoriaService.listarEmTransacao(idUsuario);
-        return ResponseEntity.ok(categorias);
+    public ResponseEntity<List<CategoriaResponse>> listarEmTransacao(@RequestParam Integer usuarioId) {
+        List<CategoriaResponse> response = categoriaService.listarEmTransacao(usuarioId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/gestao")
-    public ResponseEntity<List<CategoriaResponseGestao>> listarEmGestao(@RequestParam Integer idUsuario) {
-        List<CategoriaResponseGestao> categorias = categoriaService.listarEmGestao(idUsuario);
-        return ResponseEntity.ok(categorias);
+    public ResponseEntity<List<CategoriaResponseGestao>> listarEmGestao(@RequestParam Integer usuarioId) {
+        List<CategoriaResponseGestao> response = categoriaService.listarEmGestao(usuarioId);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaResponse> editar(@PathVariable("id") Integer idCategoria, @Valid @RequestBody CategoriaRequest request) {
-        CategoriaResponse response = categoriaService.editar(idCategoria, request);
+    public ResponseEntity<CategoriaResponse> editar(@PathVariable("id") Integer categoriaId, @Valid @RequestBody CategoriaRequest request) {
+        CategoriaResponse response = categoriaService.editar(categoriaId, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable("id") Integer idCategoria, @RequestParam Integer idUsuario) {
-        categoriaService.excluir(idCategoria, idUsuario);
+    public ResponseEntity<Void> excluir(@PathVariable("id") Integer categoriaId, @RequestParam Integer usuarioId) {
+        categoriaService.excluir(categoriaId, usuarioId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UsuarioCadastroRequest {
+public class CadastroRequest {
 
     @NotBlank(message = "Informe o seu nome.")
     @Size(max = 100, message = "O nome deve ter no máximo 100 caracteres.")

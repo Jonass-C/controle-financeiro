@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class TransacaoFormRequest {
+public class TransacaoRequest {
     @NotBlank(message = "Informe o título da transação.")
     @Size(max = 255, message = "O título deve ter no máximo 255 caracteres.")
     private String titulo;

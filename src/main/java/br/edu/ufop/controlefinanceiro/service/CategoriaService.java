@@ -9,8 +9,6 @@ import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.repository.CategoriaRepository;
 import br.edu.ufop.controlefinanceiro.repository.TransacaoRepository;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +23,7 @@ public class CategoriaService {
     private final UsuarioRepository usuarioRepository;
     private final TransacaoRepository transacaoRepository;
 
-    public CategoriaResponse criar(@Valid CategoriaRequest request) {
+    public CategoriaResponse criar(CategoriaRequest request) {
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado"));
 
@@ -42,12 +40,12 @@ public class CategoriaService {
         return converterParaResponse(categoriaSalva);
     }
 
-    public List<CategoriaResponse> listarEmTransacao(Integer idUsuario) {
-        if (!usuarioRepository.existsById(idUsuario)) {
+    public List<CategoriaResponse> listarEmTransacao(Integer usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        List<Categoria> categorias = categoriaRepository.buscarGlobaisEPersonalizadas(idUsuario);
+        List<Categoria> categorias = categoriaRepository.buscarGlobaisEPersonalizadas(usuarioId);
         List<CategoriaResponse> listaResponse = new ArrayList<>();
 
         for (Categoria categoria: categorias) {
@@ -57,23 +55,23 @@ public class CategoriaService {
         return listaResponse;
     }
 
-    public List<CategoriaResponseGestao> listarEmGestao(Integer idUsuario) {
-        if (!usuarioRepository.existsById(idUsuario)) {
+    public List<CategoriaResponseGestao> listarEmGestao(Integer usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        List<Categoria> categorias = categoriaRepository.buscarPersonalizadasDoUsuario(idUsuario);
+        List<Categoria> categorias = categoriaRepository.buscarPersonalizadasDoUsuario(usuarioId);
         List<CategoriaResponseGestao> listaResponse = new ArrayList<>();
 
         for (Categoria categoria: categorias) {
-            listaResponse.add(converterParaResponseGestao(categoria, transacaoRepository.countByCategoriaIdAndUsuarioId(categoria.getId(), idUsuario)));
+            listaResponse.add(converterParaResponseGestao(categoria, transacaoRepository.countByCategoriaIdAndUsuarioId(categoria.getId(), usuarioId)));
         }
 
         return listaResponse;
     }
 
-    public CategoriaResponse editar(Integer idCategoria, CategoriaRequest request) {
-        Categoria categoria = categoriaRepository.findById(idCategoria)
+    public CategoriaResponse editar(Integer categoriaId, CategoriaRequest request) {
+        Categoria categoria = categoriaRepository.findById(categoriaId)
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         if (categoria.getUsuario() == null) {
@@ -96,23 +94,23 @@ public class CategoriaService {
         return converterParaResponse(categoriaSalva);
     }
 
-    public void excluir(Integer idCategoria, Integer idUsuario) {
-        Categoria categoria = categoriaRepository.findById(idCategoria)
+    public void excluir(Integer categoriaId, Integer usuarioId) {
+        Categoria categoria = categoriaRepository.findById(categoriaId)
                         .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         if (categoria.getUsuario() == null) {
             throw new RegraDeNegocioException("Categorias padrão não podem ser excluídas.");
         }
 
-        if (!categoria.getUsuario().getId().equals(idUsuario)) {
+        if (!categoria.getUsuario().getId().equals(usuarioId)) {
             throw new RegraDeNegocioException("Você não tem permissão para excluir esta categoria.");
         }
 
-        if (transacaoRepository.countByCategoriaIdAndUsuarioId(idCategoria, idUsuario) > 0) {
+        if (transacaoRepository.countByCategoriaIdAndUsuarioId(categoriaId, usuarioId) > 0) {
             throw new RegraDeNegocioException("Não é possível excluir: existem transações vinculadas a esta categoria.");
         }
 
-        categoriaRepository.deleteById(idCategoria);
+        categoriaRepository.deleteById(categoriaId);
     }
 
     private CategoriaResponse converterParaResponse(Categoria categoria) {
