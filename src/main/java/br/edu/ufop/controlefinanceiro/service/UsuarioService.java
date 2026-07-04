@@ -8,6 +8,7 @@ import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
 import br.edu.ufop.controlefinanceiro.security.CryptoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,8 +17,16 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final CryptoService cryptoService;
+    @Value("${app.security.dev-mode:false}")
+    private boolean devMode;
+
 
     public UsuarioResponse cadastrar(UsuarioCadastroRequest request) {
+        int tamanhoMinimo = devMode ? 1 : 6;
+        if (request.getSenhaPura().length() < tamanhoMinimo) {
+            throw new RegraDeNegocioException("A senha deve conter no mínimo " + tamanhoMinimo + " caracteres.");
+        }
+
         if (!request.getSenhaPura().equals(request.getConfirmacaoSenha())) {
             throw new RegraDeNegocioException("As senhas não coincidem.");
         }
