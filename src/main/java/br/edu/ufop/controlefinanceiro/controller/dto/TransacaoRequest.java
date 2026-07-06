@@ -30,8 +30,4 @@ public class TransacaoRequest {
 
     @NotBlank(message = "Informe o nome da categoria.")
     private String categoriaNome;
-
-    // TODO: remover este atributo daqui e fazer a autenticação/sessão seguindo boas práticas de segurança
-    @NotNull(message = "O ID do usuário é obrigatório.")
-    private Integer usuarioId;
 }

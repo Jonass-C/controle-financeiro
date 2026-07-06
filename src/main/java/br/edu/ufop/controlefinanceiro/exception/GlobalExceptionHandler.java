@@ -2,6 +2,8 @@ package br.edu.ufop.controlefinanceiro.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,6 +30,16 @@ public class GlobalExceptionHandler {
 
         problem.setProperty("erros", erros);
         return problem;
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail handleAuthenticationException(Exception e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Falha na autenticação: Você precisa fazer login ou fornecer um token válido.");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleAccessDeniedException(Exception e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Acesso negado: Você não tem permissão para acessar este recurso.");
     }
 
 }

@@ -24,13 +24,13 @@ public class TransacaoService {
     private final UsuarioRepository usuarioRepository;
     private final CategoriaRepository categoriaRepository;
 
-    public TransacaoResponse criar(TransacaoRequest request){
+    public TransacaoResponse criar(TransacaoRequest request, Integer usuarioId){
         validarDataEValor(request.getData(), request.getValor());
 
-        Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
+        Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado."));
 
-        Categoria categoria = categoriaRepository.buscarPorNomeEUsuario(request.getCategoriaNome(), request.getUsuarioId())
+        Categoria categoria = categoriaRepository.buscarPorNomeEUsuario(request.getCategoriaNome(), usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         Transacao transacao = Transacao.builder()
@@ -52,8 +52,6 @@ public class TransacaoService {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        // TODO: Substituir este idUsuario recebido por parâmetro pela extração nativa do Token/Sessão do usuário logado
-
         List<Transacao> transacoes = transacaoRepository.findByUsuarioIdOrderByDataDesc(usuarioId);
         List<TransacaoResponse> listaResponse = new ArrayList<>();
 
@@ -64,17 +62,17 @@ public class TransacaoService {
         return listaResponse;
     }
 
-    public TransacaoResponse editar(Integer transacaoId, TransacaoRequest request){
+    public TransacaoResponse editar(Integer transacaoId, TransacaoRequest request, Integer usuarioId){
         validarDataEValor(request.getData(), request.getValor());
 
-        if(!usuarioRepository.existsById(request.getUsuarioId())) {
+        if(!usuarioRepository.existsById(usuarioId)) {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        Transacao transacao = transacaoRepository.findById(transacaoId)
+        Transacao transacao = transacaoRepository.findByIdAndUsuarioId(transacaoId, usuarioId)
                 .orElseThrow(()->new RegraDeNegocioException("Transação não encontrada."));
 
-        Categoria categoria = categoriaRepository.buscarPorNomeEUsuario(request.getCategoriaNome(), request.getUsuarioId())
+        Categoria categoria = categoriaRepository.buscarPorNomeEUsuario(request.getCategoriaNome(), usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         transacao.setTitulo(request.getTitulo());
@@ -88,8 +86,11 @@ public class TransacaoService {
         return converterParaResponse(transacaoSalva);
     }
 
-    public void excluir(Integer transacaoId){
-        transacaoRepository.deleteById(transacaoId);
+    public void excluir(Integer transacaoId, Integer usuarioId){
+        Transacao transacao = transacaoRepository.findByIdAndUsuarioId(transacaoId, usuarioId)
+                .orElseThrow(() -> new RuntimeException("Transação não encontrada."));
+
+        transacaoRepository.delete(transacao);
     }
 
     private TransacaoResponse converterParaResponse(Transacao transacao) {

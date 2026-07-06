@@ -9,6 +9,10 @@ Content-Type: application/json
   "confirmacaoSenha": "senha123"
 }
 
+> {%
+    client.global.set("token", response.body.token);
+%}
+
 ### Teste 2: Tentar cadastrar usuário já existente
 POST http://localhost:8080/usuarios/cadastro
 Content-Type: application/json
@@ -49,6 +53,10 @@ Content-Type: application/json
   "senhaPura": "senha123"
 }
 
+> {%
+    client.global.set("token", response.body.token);
+%}
+
 ### Teste 6: Tentar cadastrar com DTO inválido (campos vazios, senha curta e sem nome)
 POST http://localhost:8080/usuarios/cadastro
 Content-Type: application/json
@@ -59,9 +67,14 @@ Content-Type: application/json
   "confirmacaoSenha": ""
 }
 
-### Teste 7: Criar uma Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
+### Teste 7: Tentar listar categorias SEM TOKEN (Erro 403 Forbidden ou 401 Unauthorized)
+GET http://localhost:8080/categorias
+Content-Type: application/json
+
+### Teste 8: Criar uma Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
 POST http://localhost:8080/transacoes
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "titulo": "Pão",
@@ -69,13 +82,13 @@ Content-Type: application/json
   "valor": 20,
   "tipo": "DESPESA",
   "descricao": "pãozin",
-  "categoriaNome": "Alimentação",
-  "usuarioId": 1
+  "categoriaNome": "Alimentação"
 }
 
-### Teste 8: Editar uma Transação
+### Teste 9: Editar uma Transação
 PUT http://localhost:8080/transacoes/1
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "titulo": "Pãozin de queijo",
@@ -83,66 +96,71 @@ Content-Type: application/json
   "valor": 20.0,
   "tipo": "DESPESA",
   "descricao": "pãozin de queijo",
-  "categoriaNome": "Lazer",
-  "usuarioId": 1
+  "categoriaNome": "Lazer"
 }
 
-### Teste 9: Criar outra Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
+### Teste 10: Criar outra Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
 POST http://localhost:8080/transacoes
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "titulo": "Busão",
-  "data": "2026-06-24",
+  "data": "2026-06-20",
   "valor": 16.50,
   "tipo": "DESPESA",
   "descricao": "",
-  "categoriaNome": "Transporte",
-  "usuarioId": 1
+  "categoriaNome": "Transporte"
 }
 
-### Teste 10: Listar Transações do Usuário 1
-GET http://localhost:8080/transacoes?idUsuario=1
+### Teste 11: Listar Transações do Usuário 1
+GET http://localhost:8080/transacoes
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
-### Teste 11: Excluir a Transação 2
+### Teste 12: Excluir a Transação 2
 DELETE http://localhost:8080/transacoes/2
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
-### Teste 12: Criar uma nova categoria personalizada
+### Teste 13: Criar uma nova categoria personalizada
 POST http://localhost:8080/categorias
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "nome": "Academia",
-  "usuarioId": 1
+  "nome": "Academia"
 }
 
-### Teste 13: Listar Categorias para Nova Transação (Globais + Usuário)
-GET http://localhost:8080/categorias?idUsuario=1
+### Teste 14: Listar Categorias para Nova Transação (Globais + Usuário)
+GET http://localhost:8080/categorias
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
-### Teste 14: Listar Categorias para Gestão (Apenas do Usuário com Contagem)
-GET http://localhost:8080/categorias/gestao?idUsuario=1
+### Teste 15: Listar Categorias para Gestão (Apenas do Usuário com Contagem)
+GET http://localhost:8080/categorias/gestao
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
-### Teste 15: Tentar criar uma categoria com nome duplicado (dá erro)
+### Teste 16: Tentar criar uma categoria com nome duplicado (dá erro)
 POST http://localhost:8080/categorias
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "nome": "Academia",
-  "usuarioId": 1
+  "nome": "Academia"
 }
 
-### Teste 16: Editar nome da Categoria (ID 10 = Academia -> Crossfit)
+### Teste 17: Editar nome da Categoria (ID 10 = Academia -> Crossfit)
 PUT http://localhost:8080/categorias/10
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "nome": "Crossfit",
-  "usuarioId": 1
+  "nome": "Crossfit"
 }
 
 ### Teste 17: Excluir a Categoria (ID 10)
-DELETE http://localhost:8080/categorias/10?idUsuario=1
+DELETE http://localhost:8080/categorias/10
+Content-Type: application/json
+Authorization: Bearer {{token}}

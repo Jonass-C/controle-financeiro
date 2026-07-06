@@ -23,11 +23,11 @@ public class CategoriaService {
     private final UsuarioRepository usuarioRepository;
     private final TransacaoRepository transacaoRepository;
 
-    public CategoriaResponse criar(CategoriaRequest request) {
-        Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
+    public CategoriaResponse criar(CategoriaRequest request, Integer usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado"));
 
-        if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome(), request.getUsuarioId())) {
+        if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome(), usuarioId)) {
             throw new RegraDeNegocioException("Categoria já existente.");
         }
 
@@ -70,20 +70,16 @@ public class CategoriaService {
         return listaResponse;
     }
 
-    public CategoriaResponse editar(Integer categoriaId, CategoriaRequest request) {
-        Categoria categoria = categoriaRepository.findById(categoriaId)
+    public CategoriaResponse editar(Integer categoriaId, CategoriaRequest request, Integer usuarioId) {
+        Categoria categoria = categoriaRepository.findByIdAndUsuarioId(categoriaId, usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         if (categoria.getUsuario() == null) {
             throw new RegraDeNegocioException("Categorias padrão não podem ser editadas.");
         }
 
-        if (!categoria.getUsuario().getId().equals(request.getUsuarioId())) {
-            throw new RegraDeNegocioException("Você não tem permissão para editar esta categoria.");
-        }
-
         if (!categoria.getNome().equalsIgnoreCase(request.getNome())) {
-            if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome(), request.getUsuarioId())) {
+            if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome(), usuarioId)) {
                 throw new RegraDeNegocioException("Você já possui uma categoria com este nome.");
             }
         }
@@ -95,22 +91,18 @@ public class CategoriaService {
     }
 
     public void excluir(Integer categoriaId, Integer usuarioId) {
-        Categoria categoria = categoriaRepository.findById(categoriaId)
+        Categoria categoria = categoriaRepository.findByIdAndUsuarioId(categoriaId, usuarioId)
                         .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         if (categoria.getUsuario() == null) {
             throw new RegraDeNegocioException("Categorias padrão não podem ser excluídas.");
         }
 
-        if (!categoria.getUsuario().getId().equals(usuarioId)) {
-            throw new RegraDeNegocioException("Você não tem permissão para excluir esta categoria.");
-        }
-
         if (transacaoRepository.countByCategoriaIdAndUsuarioId(categoriaId, usuarioId) > 0) {
             throw new RegraDeNegocioException("Não é possível excluir: existem transações vinculadas a esta categoria.");
         }
 
-        categoriaRepository.deleteById(categoriaId);
+        categoriaRepository.delete(categoria);
     }
 
     private CategoriaResponse converterParaResponse(Categoria categoria) {

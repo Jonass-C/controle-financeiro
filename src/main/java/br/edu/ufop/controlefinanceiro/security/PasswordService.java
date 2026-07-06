@@ -10,7 +10,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.HexFormat;
 
 @Service
-public class CryptoService {
+public class PasswordService {
 
     private static final String ALGORITMO = "PBKDF2WithHmacSHA256";
     private static final int ITERACOES = 210000;
