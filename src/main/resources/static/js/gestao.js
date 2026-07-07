@@ -19,6 +19,49 @@ const modalDashboard = document.getElementById("modal-dashboard");
 const abrirDashboard = document.getElementById("abrir-dashboard");
 const usuarioBtn = document.getElementById("usuario-btn");
 const menuUsuario = document.getElementById("menu-usuario");
+const modalCategorias = document.getElementById("modal-categorias");
+const abrirCategorias = document.getElementById("abrir-categorias");
+const listaCategorias = document.getElementById("lista-categorias");
+const btnAdicionarCategoria = document.getElementById("adicionar-categoria");
+const btnFecharCategorias = document.getElementById("fechar-categorias");
+const btnVerPerfil = document.getElementById("ver-perfil");
+const modalPerfil = document.getElementById("modal-perfil");
+const btnFecharPerfil = document.getElementById("fechar-perfil");
+const btnAlterarSenha = document.getElementById("btn-alterar-senha");
+const containerSenha = document.getElementById("container-senha");
+const btnCancelarSenha = document.getElementById("btn-cancelar-senha");
+const btnSalvarSenha = document.getElementById("btn-salvar-senha");
+const displayNome = document.getElementById("display-nome-perfil");
+const chaveNomePerfil = `perfil_nome_${idUsuario}`;
+
+const mapaCategorias = {
+    "Alimentação": 1,
+    "Moradia": 2,
+    "Transporte": 3,
+    "Saúde": 4,
+    "Educação": 5,
+    "Lazer": 6,
+    "Compras": 7,
+    "Salário": 8,
+    "Investimentos": 9
+};
+const chaveUsuario = `categoriasCustomizadas_${idUsuario}`;
+let categoriasSalvas = JSON.parse(localStorage.getItem(chaveUsuario));
+if (!categoriasSalvas) {
+    categoriasSalvas = Object.keys(mapaCategorias);
+    localStorage.setItem(chaveUsuario, JSON.stringify(categoriasSalvas));
+}
+const select = document.getElementById("categoria");
+categoriasSalvas.forEach(cat => {
+    const jaExiste = Array.from(select.options).some(opt => opt.value === cat);
+    if (!jaExiste) {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        const indiceUltimo = select.options.length - 1;
+        select.insertBefore(opt, select.options[indiceUltimo]);
+    }
+});
 
 if(nomeUsuario){
     const primeiroNome = nomeUsuario.split(" ")[0];
@@ -57,8 +100,22 @@ abrirDashboard.addEventListener("click", function(){
     modalDashboard.style.display = "flex";
 });
 
+abrirCategorias.addEventListener("click", function(){
+    atualizarListaCategorias();
+    modalCategorias.style.display = "flex";
+});
+
 usuarioBtn.addEventListener("click", function(){
     menuUsuario.classList.toggle("ativo");
+});
+
+btnVerPerfil.addEventListener("click", function(){
+    modalPerfil.style.display = "flex";
+    menuUsuario.classList.remove("ativo");
+});
+
+btnFecharPerfil.addEventListener("click", function(){
+    modalPerfil.style.display = "none";
 });
 
 document.getElementById("logout").addEventListener("click", function(){
@@ -86,10 +143,17 @@ window.addEventListener("click", function(e){
         modalDashboard.style.display = "none";
     }
 
+    if(e.target == modalCategorias){
+        modalCategorias.style.display = "none";
+    }
+
     if(!usuarioBtn.contains(e.target) && !menuUsuario.contains(e.target)){
         menuUsuario.classList.remove("ativo");
     }
 
+    if(e.target == modalPerfil){
+        modalPerfil.style.display = "none";
+    }
 });
 
 categoria.addEventListener("change", function(){
@@ -124,12 +188,17 @@ function configurarEventosLinha(linha) {
         const dataTabela = linha.cells[1].innerHTML.split("/");
         fp.setDate(dataTabela[2] + "-" + dataTabela[1] + "-" + dataTabela[0]);
 
-        if(document.getElementById("categoria").querySelector(`option[value="${linha.cells[2].innerHTML}"]`)){
-            document.getElementById("categoria").value = linha.cells[2].innerHTML;
-        }else{
-            document.getElementById("categoria").value = "nova";
+        const selectCategoria = document.getElementById("categoria");
+        const categoriaLinha = linha.cells[2].textContent.trim();
+        const opcaoExiste = Array.from(selectCategoria.options).find(opcao => opcao.value.trim() === categoriaLinha);
+        if (opcaoExiste) {
+            selectCategoria.value = categoriaLinha;
+            novaCategoria.style.display = "none";
+            novaCategoria.value = "";
+        } else {
+            selectCategoria.value = "nova";
             novaCategoria.style.display = "block";
-            novaCategoria.value = linha.cells[2].innerHTML;
+            novaCategoria.value = categoriaLinha;
         }
         document.getElementById("tipo").value = linha.cells[3].innerHTML;
         document.getElementById("valor").value = linha.cells[4].innerHTML
@@ -143,23 +212,184 @@ function configurarEventosLinha(linha) {
 
 function adicionarCategoriaNaLista(nomeCategoria) {
     const select = document.getElementById("categoria");
-    const existe = Array.from(select.options).some(opt => opt.value === nomeCategoria);
-    if (existe) return;
-
+    const existe = Array.from(select.options).some(opt => opt.value.toLowerCase() === nomeCategoria.toLowerCase());
+    if (existe) {
+        return false;
+    }
     const novaOption = document.createElement("option");
     novaOption.value = nomeCategoria;
     novaOption.textContent = nomeCategoria;
-
     const indiceUltimo = select.options.length - 1;
     select.insertBefore(novaOption, select.options[indiceUltimo]);
-
     const chaveUsuario = `categoriasCustomizadas_${idUsuario}`;
-
     let categoriasSalvas = JSON.parse(localStorage.getItem(chaveUsuario)) || [];
     if (!categoriasSalvas.includes(nomeCategoria)) {
         categoriasSalvas.push(nomeCategoria);
         localStorage.setItem(chaveUsuario, JSON.stringify(categoriasSalvas));
     }
+    return true;
+}
+
+btnAdicionarCategoria.addEventListener("click", function () {
+    const input = document.getElementById("nova-categoria-gerenciar");
+    const nomeCategoria = input.value.trim();
+    if (nomeCategoria === "") {
+        input.focus();
+        return;
+    }
+    const foiAdicionada = adicionarCategoriaNaLista(nomeCategoria);
+    if (foiAdicionada) {
+        atualizarListaCategorias();
+        input.value = "";
+    } else {
+        alert("Esta categoria já existe!");
+    }
+    input.focus();
+});
+
+btnFecharCategorias.addEventListener("click", function () {
+    modalCategorias.style.display = "none";
+});
+
+function atualizarListaCategorias() {
+    listaCategorias.innerHTML = "";
+    const select = document.getElementById("categoria");
+    const tabela = document.getElementById("tabela-transacoes");
+    const chaveUsuario = `categoriasCustomizadas_${idUsuario}`;
+    let categoriasSalvas = JSON.parse(localStorage.getItem(chaveUsuario)) || [];
+    categoriasSalvas.forEach(nomeDaCategoria => {
+        let qtdTransacoes = 0;
+        for (let i = 0; i < tabela.rows.length; i++) {
+            if (tabela.rows[i].cells[2].textContent.trim() === nomeDaCategoria) {
+                qtdTransacoes++;
+            }
+        }
+        const item = document.createElement("div");
+        item.className = "item-categoria";
+        item.innerHTML = `
+            <span>${nomeDaCategoria} (${qtdTransacoes})</span>
+            <div class="acoes-categoria">
+                <button class="editar-categoria" title="Editar">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="remover-categoria" title="Excluir">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
+        `;
+        item.querySelector(".remover-categoria").addEventListener("click", function() {
+            const modalExclusao = document.getElementById("modal-confirmar-exclusao");
+            const textoExclusao = document.getElementById("texto-exclusao-categoria");
+            const areaTransferencia = document.getElementById("area-transferencia-categoria");
+            const selectTransferencia = document.getElementById("select-transferir-categoria");
+            if (qtdTransacoes > 0) {
+                textoExclusao.innerHTML = `Existem <strong>${qtdTransacoes} transação(ões)</strong> usando a categoria "${nomeDaCategoria}".<br>Para qual categoria você deseja movê-las?`;
+                areaTransferencia.style.display = "block";
+                selectTransferencia.innerHTML = "";
+                categoriasSalvas.forEach(cat => {
+                    if(cat !== nomeDaCategoria) {
+                        const opt = document.createElement("option");
+                        opt.value = cat;
+                        opt.textContent = cat;
+                        selectTransferencia.appendChild(opt);
+                    }
+                });
+            } else {
+                textoExclusao.innerHTML = `Tem certeza que deseja excluir a categoria <strong>"${nomeDaCategoria}"</strong> definitivamente?`;
+                areaTransferencia.style.display = "none";
+            }
+            modalExclusao.style.display = "flex";
+            document.getElementById("btn-cancelar-exclusao").onclick = function() {
+                modalExclusao.style.display = "none";
+            };
+            document.getElementById("btn-confirmar-exclusao").onclick = function() {
+                if (qtdTransacoes > 0) {
+                    const novaCat = selectTransferencia.value;
+                    if(novaCat) {
+                        for (let i = 0; i < tabela.rows.length; i++) {
+                            if (tabela.rows[i].cells[2].textContent.trim() === nomeDaCategoria) {
+                                tabela.rows[i].cells[2].textContent = novaCat;
+                            }
+                        }
+                    }
+                }
+                let catsAtualizadas = JSON.parse(localStorage.getItem(chaveUsuario)) || [];
+                catsAtualizadas = catsAtualizadas.filter(c => c !== nomeDaCategoria);
+                localStorage.setItem(chaveUsuario, JSON.stringify(catsAtualizadas));
+                Array.from(select.options).forEach(opt => {
+                    if(opt.value === nomeDaCategoria) opt.remove();
+                });
+                modalExclusao.style.display = "none";
+                atualizarListaCategorias();
+            };
+        });
+        item.querySelector(".editar-categoria").addEventListener("click", function() {
+            item.innerHTML = `
+                <input type="text" value="${nomeDaCategoria}" class="input-edicao-inline">
+                <div class="acoes-categoria">
+                    <button class="confirmar-edicao btn-icone-sucesso" title="Confirmar">
+                        <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="cancelar-edicao btn-icone-perigo" title="Cancelar">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            `;
+            const inputEdicao = item.querySelector(".input-edicao-inline");
+            inputEdicao.focus();
+            item.querySelector(".cancelar-edicao").addEventListener("click", function() {
+                atualizarListaCategorias();
+            });
+            item.querySelector(".confirmar-edicao").addEventListener("click", function() {
+                const novoNome = inputEdicao.value.trim();
+                if (!novoNome || novoNome === "" || novoNome === nomeDaCategoria) {
+                    atualizarListaCategorias();
+                    return;
+                }
+                const processarEdicao = (atualizarTransacoes) => {
+                    if (atualizarTransacoes && qtdTransacoes > 0) {
+                        for (let i = 0; i < tabela.rows.length; i++) {
+                            if (tabela.rows[i].cells[2].textContent.trim() === nomeDaCategoria) {
+                                tabela.rows[i].cells[2].textContent = novoNome;
+                            }
+                        }
+                    }
+                    let catsAtualizadas = JSON.parse(localStorage.getItem(chaveUsuario)) || [];
+                    const index = catsAtualizadas.indexOf(nomeDaCategoria);
+                    if (index !== -1) catsAtualizadas[index] = novoNome;
+                    localStorage.setItem(chaveUsuario, JSON.stringify(catsAtualizadas));
+                    Array.from(select.options).forEach(opt => {
+                        if(opt.value === nomeDaCategoria) {
+                            opt.value = novoNome;
+                            opt.textContent = novoNome;
+                        }
+                    });
+                    atualizarListaCategorias();
+                };
+                if (qtdTransacoes > 0) {
+                    const modalEdicao = document.getElementById("modal-confirmar-edicao");
+                    const textoEdicao = document.getElementById("texto-edicao-categoria");
+                    textoEdicao.innerHTML = `Esta categoria está ligada a <strong>${qtdTransacoes} transação(ões)</strong>.<br>Deseja alterar o nome de "${nomeDaCategoria}" para "${novoNome}" nelas também?`;
+                    modalEdicao.style.display = "flex";
+                    document.getElementById("btn-nao-atualizar-edicao").onclick = function() {
+                        modalEdicao.style.display = "none";
+                        processarEdicao(false);
+                    };
+                    document.getElementById("btn-sim-atualizar-edicao").onclick = function() {
+                        modalEdicao.style.display = "none";
+                        processarEdicao(true);
+                    };
+                    document.getElementById("btn-cancelar-edicao").onclick = function() {
+                        modalEdicao.style.display = "none";
+                        atualizarListaCategorias();
+                    };
+                } else {
+                    processarEdicao(false);
+                }
+            });
+        });
+        listaCategorias.appendChild(item);
+    });
 }
 
 form.addEventListener("submit", function(e){
@@ -246,17 +476,6 @@ form.addEventListener("submit", function(e){
     }
 
     let idCategoriaDesejado = 1;
-    const mapaCategorias = {
-        "Alimentação": 1,
-        "Moradia": 2,
-        "Transporte": 3,
-        "Saúde": 4,
-        "Educação": 5,
-        "Lazer": 6,
-        "Compras": 7,
-        "Salário": 8,
-        "Investimentos": 9
-    };
 
     if (categoriaSelect !== "nova" && mapaCategorias[categoriaSelect]) {
         idCategoriaDesejado = mapaCategorias[categoriaSelect];
@@ -438,7 +657,14 @@ fp = flatpickr("#calendario-container", {
     showMonths: 1,
     animate: true,
     weekNumbers: false,
-    fixedHeight: true
+    fixedHeight: true,
+    onChange: function(selectedDates, dateStr, instance) {
+        if (instance.input) instance.input.classList.remove("erro-campo");
+        if (instance.altInput) instance.altInput.classList.remove("erro-campo");
+        document.getElementById("data").classList.remove("erro-campo");
+        const msgErroData = document.getElementById("erro-data-limite");
+        if (msgErroData) msgErroData.style.display = "none";
+    }
 });
 
 document.getElementById("calendario-container").addEventListener("input", function (e) {
@@ -544,6 +770,95 @@ function carregarTransacoesDoBanco() {
         }
     });
 })();
+
+function configurarEdicaoPerfil(idLinha, idDisplay, chaveLocalStorage, label) {
+    const linha = document.getElementById(idLinha);
+    const display = document.getElementById(idDisplay);
+    const btnEditar = linha.querySelector(".btn-editar-perfil");
+    const valorSalvo = localStorage.getItem(chaveLocalStorage);
+    if (valorSalvo) {
+        display.textContent = valorSalvo;
+    }
+    btnEditar.addEventListener("click", function() {
+        const valorAtual = display.textContent;
+        linha.innerHTML = `
+            <div class="container-edicao-perfil">
+                <input type="text" class="input-perfil" value="${valorAtual}">
+                <button class="confirmar-edicao-perfil btn-icone-sucesso" title="Salvar">
+                    <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="cancelar-edicao-perfil btn-icone-perigo" title="Cancelar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        `;
+        const input = linha.querySelector(".input-perfil");
+        input.focus();
+        linha.querySelector(".cancelar-edicao-perfil").addEventListener("click", function() {
+            restaurarVisualizacao();
+        });
+        linha.querySelector(".confirmar-edicao-perfil").addEventListener("click", function() {
+            const novoValor = input.value.trim();
+            if (novoValor) {
+                localStorage.setItem(chaveLocalStorage, novoValor);
+                display.textContent = novoValor;
+                if (idDisplay === "display-nome-perfil") {
+                    const primeiroNome = novoValor.split(" ")[0];
+                    document.getElementById("usuario-nome").textContent = `Olá, ${primeiroNome}`;
+                }
+            }
+            restaurarVisualizacao();
+        });
+        function restaurarVisualizacao() {
+            linha.innerHTML = `
+                <div class="info-dado">
+                    <span class="label-dado">${label}</span>
+                    <span class="valor-dado" id="${idDisplay}">${display.textContent}</span>
+                </div>
+                <button class="btn-editar-perfil" title="Editar">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+            `;
+            configurarEdicaoPerfil(idLinha, idDisplay, chaveLocalStorage, label);
+        }
+    });
+}
+
+if (!localStorage.getItem(chaveNomePerfil) && nomeUsuario) {
+    displayNome.textContent = nomeUsuario;
+}
+
+configurarEdicaoPerfil("linha-nome-perfil", "display-nome-perfil", chaveNomePerfil, "Nome:");
+configurarEdicaoPerfil("linha-email-perfil", "display-email-perfil", `perfil_identificador_${idUsuario}`, "Identificador:");
+
+if(btnAlterarSenha) {
+    btnAlterarSenha.addEventListener("click", () => {
+        btnAlterarSenha.style.display = "none";
+        containerSenha.style.display = "flex";
+    });
+}
+
+if(btnCancelarSenha) {
+    btnCancelarSenha.addEventListener("click", () => {
+        containerSenha.style.display = "none";
+        btnAlterarSenha.style.display = "flex";
+        document.getElementById("senha-atual").value = "";
+        document.getElementById("nova-senha").value = "";
+    });
+}
+
+if(btnSalvarSenha) {
+    btnSalvarSenha.addEventListener("click", () => {
+        const senhaAtual = document.getElementById("senha-atual").value;
+        const novaSenha = document.getElementById("nova-senha").value;
+        if(!senhaAtual || !novaSenha) {
+            alert("Preencha a senha atual e a nova senha!");
+            return;
+        }
+        alert("Simulação: Senha alterada com sucesso! (Falta conectar com o Java)");
+        btnCancelarSenha.click();
+    });
+}
 
 atualizarResumo();
 carregarTransacoesDoBanco();
