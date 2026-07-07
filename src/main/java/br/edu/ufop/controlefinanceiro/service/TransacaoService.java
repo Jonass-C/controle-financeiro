@@ -1,6 +1,6 @@
 package br.edu.ufop.controlefinanceiro.service;
 
-import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoFormRequest;
+import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoRequest;
 import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoResponse;
 import br.edu.ufop.controlefinanceiro.domain.Categoria;
 import br.edu.ufop.controlefinanceiro.domain.Transacao;
@@ -9,7 +9,6 @@ import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.repository.CategoriaRepository;
 import br.edu.ufop.controlefinanceiro.repository.TransacaoRepository;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +24,13 @@ public class TransacaoService {
     private final UsuarioRepository usuarioRepository;
     private final CategoriaRepository categoriaRepository;
 
-    public TransacaoResponse criar(TransacaoFormRequest request){
+    public TransacaoResponse criar(TransacaoRequest request, Integer usuarioId){
         validarDataEValor(request.getData(), request.getValor());
 
-        Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
+        Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado."));
 
-        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+        Categoria categoria = categoriaRepository.buscarPorNomeEUsuario(request.getCategoriaNome(), usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         Transacao transacao = Transacao.builder()
@@ -48,14 +47,12 @@ public class TransacaoService {
         return converterParaResponse(transacaoSalva);
     }
 
-    public List<TransacaoResponse> listar(Integer idUsuario) {
-        if (!usuarioRepository.existsById(idUsuario)) {
+    public List<TransacaoResponse> listar(Integer usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        // TODO: Substituir este idUsuario recebido por parâmetro pela extração nativa do Token/Sessão do usuário logado
-
-        List<Transacao> transacoes = transacaoRepository.findByUsuarioIdOrderByDataDesc(idUsuario);
+        List<Transacao> transacoes = transacaoRepository.findByUsuarioIdOrderByDataDesc(usuarioId);
         List<TransacaoResponse> listaResponse = new ArrayList<>();
 
         for (Transacao transacao : transacoes) {
@@ -65,17 +62,17 @@ public class TransacaoService {
         return listaResponse;
     }
 
-    public TransacaoResponse editar(Integer id, @Valid TransacaoFormRequest request){
+    public TransacaoResponse editar(Integer transacaoId, TransacaoRequest request, Integer usuarioId){
         validarDataEValor(request.getData(), request.getValor());
 
-        if(!usuarioRepository.existsById(request.getUsuarioId())) {
+        if(!usuarioRepository.existsById(usuarioId)) {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        Transacao transacao = transacaoRepository.findById(id)
+        Transacao transacao = transacaoRepository.findByIdAndUsuarioId(transacaoId, usuarioId)
                 .orElseThrow(()->new RegraDeNegocioException("Transação não encontrada."));
 
-        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+        Categoria categoria = categoriaRepository.buscarPorNomeEUsuario(request.getCategoriaNome(), usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
         transacao.setTitulo(request.getTitulo());
@@ -89,8 +86,11 @@ public class TransacaoService {
         return converterParaResponse(transacaoSalva);
     }
 
-    public void excluir(Integer idTransacao){
-        transacaoRepository.deleteById(idTransacao);
+    public void excluir(Integer transacaoId, Integer usuarioId){
+        Transacao transacao = transacaoRepository.findByIdAndUsuarioId(transacaoId, usuarioId)
+                .orElseThrow(() -> new RuntimeException("Transação não encontrada."));
+
+        transacaoRepository.delete(transacao);
     }
 
     private TransacaoResponse converterParaResponse(Transacao transacao) {
@@ -106,7 +106,7 @@ public class TransacaoService {
         );
     }
 
-    public void validarDataEValor(LocalDate data, double valor){
+    private void validarDataEValor(LocalDate data, double valor){
         if(data.isAfter(LocalDate.now().plusYears(5))) {
             throw new RegraDeNegocioException("A data não pode ser superior a cinco anos.");
         }

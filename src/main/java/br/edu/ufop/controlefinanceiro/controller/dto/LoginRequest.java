@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UsuarioLoginRequest {
+public class LoginRequest {
 
     @NotBlank(message = "O identificador de login é obrigatório.")
     private String identificadorLogin;

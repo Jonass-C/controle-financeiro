@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UsuarioCadastroRequest {
+public class CadastroRequest {
 
     @NotBlank(message = "Informe o seu nome.")
     @Size(max = 100, message = "O nome deve ter no máximo 100 caracteres.")
@@ -18,7 +18,7 @@ public class UsuarioCadastroRequest {
     private String identificadorLogin;
 
     @NotBlank(message = "A senha é obrigatória.")
-    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
+    //@Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
     private String senhaPura;
 
     @NotBlank(message = "A confirmação de senha é obrigatória.")
