@@ -33,7 +33,7 @@ public class UsuarioService {
             throw new RegraDeNegocioException("As senhas não coincidem.");
         }
 
-        if (usuarioRepository.existsByIdentificadorLogin(request.getIdentificadorLogin())) {
+        if (usuarioRepository.existsByIdentificadorLogin(request.getIdentificadorLogin().trim())) {
             throw new RegraDeNegocioException("Já existe um usuário com esse identificador.");
         }
 
@@ -41,8 +41,8 @@ public class UsuarioService {
         String hashSenha = passwordService.hashSenha(request.getSenhaPura(), salt);
 
         Usuario usuario = Usuario.builder()
-                .nome(request.getNome())
-                .identificadorLogin(request.getIdentificadorLogin())
+                .nome(request.getNome().trim())
+                .identificadorLogin(request.getIdentificadorLogin().trim())
                 .hashSenha(hashSenha)
                 .salt(salt)
                 .build();

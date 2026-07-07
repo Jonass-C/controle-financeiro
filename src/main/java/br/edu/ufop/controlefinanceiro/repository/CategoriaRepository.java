@@ -11,14 +11,9 @@ import java.util.Optional;
 public interface CategoriaRepository extends JpaRepository<Categoria, Integer> {
     Optional<Categoria> findByIdAndUsuarioId(Integer id, Integer usuarioId);
 
-    @Query("SELECT c FROM Categoria c WHERE LOWER(c.nome) = LOWER(:nome) AND (c.usuario.id = :usuarioId OR c.usuario IS NULL)")
+    @Query("SELECT c FROM Categoria c WHERE LOWER(c.nome) = LOWER(:nome) AND c.usuario.id = :usuarioId")
     Optional<Categoria> buscarPorNomeEUsuario(@Param("nome") String nome, @Param("usuarioId") Integer usuarioId);
 
-    @Query("SELECT c FROM Categoria c WHERE c.usuario IS NULL OR c.usuario.id = :usuarioId ORDER BY c.usuario.id ASC, c.nome ASC")
-    List<Categoria> buscarGlobaisEPersonalizadas(@Param("usuarioId") Integer usuarioId);
-
-    @Query("SELECT c FROM Categoria c WHERE c.usuario.id = :usuarioId ORDER BY c.nome ASC")
-    List<Categoria> buscarPersonalizadasDoUsuario(@Param("usuarioId") Integer usuarioId);
-
+    List<Categoria> findByUsuarioIdOrderByNomeAsc(Integer usuarioId);
     boolean existsByNomeIgnoreCaseAndUsuarioId(String nome, Integer usuarioId);
 }
