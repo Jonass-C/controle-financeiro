@@ -70,6 +70,9 @@
                     <input type="text" id="data" placeholder="dd/mm/aaaa" data-input>
                     <span class="material-symbols-outlined icone-calendario" data-toggle>calendar_month</span>
                 </div>
+                <span id="erro-data-limite" style="color: #ff3b3b; font-size: 12px; display: none; margin-top: 5px; font-weight: 500;">
+                    Não é permitido lançar transações com mais de 5 anos de diferença!
+                </span>
             </div>
             <div class="campo">
                 <label>Descrição</label>
@@ -192,6 +195,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 
+<script src="js/tema.js"></script>
 <script src="js/gestao.js"></script>
 
 </body>

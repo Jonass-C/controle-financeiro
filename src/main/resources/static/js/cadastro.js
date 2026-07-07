@@ -42,24 +42,22 @@ form.addEventListener("submit", function (event) {
     })
     .then(async response => {
         if (response.ok) {
-            const textoSucesso = await response.text();
-            mensagem.textContent = textoSucesso;
+            mensagem.textContent = "Usuário cadastrado com sucesso!";
             mensagem.style.color = "green";
             form.reset();
             setTimeout(() => {
                 window.location.href = "index.html";
             }, 2000);
         } else {
-            //const textoErro = await response.text();
-            //mensagem.textContent = textoErro || "Erro ao realizar cadastro.";
-
-            // mudanca aqui: le o erro como json para extrair a mensagem limpa
-            const erroJson = await response.json();
-            // pega apenas o detail do erro do spring boot
-            const mensagemLimpa = erroJson.detail || "Erro ao realizar cadastro.";
-            mensagem.textContent = mensagemLimpa;
+            try {
+                const erroJson = await response.json();
+                mensagem.textContent = erroJson.detail || erroJson.mensagem || "Erro ao realizar cadastro.";
+            } catch (e) {
+                mensagem.textContent = "Erro ao realizar cadastro.";
+            }
             mensagem.style.color = "red";
         }
+
     })
     .catch(error => {
         console.error("erro na requisicao:", error);

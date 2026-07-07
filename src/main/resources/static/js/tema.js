@@ -25,17 +25,21 @@ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", fun
 
 function alternarTema() {
     const novoTema = body.classList.contains("dark") ? "light" : "dark";
-
     aplicarTema(novoTema);
     localStorage.setItem("tema", novoTema);
+    const icone = document.querySelector("#trocar-tema .icone-menu");
+    if (icone) {
+        icone.textContent = novoTema === "light" ? "dark_mode" : "light_mode";
+    }
 }
 
-function usarTemaSistema() {
-    localStorage.removeItem("tema");
+document.addEventListener("DOMContentLoaded", () => {
+    const btnTrocarTema = document.getElementById("trocar-tema");
 
-    const temaSistema = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-
-    aplicarTema(temaSistema);
-}
+    if (btnTrocarTema) {
+        btnTrocarTema.addEventListener("click", (e) => {
+            e.preventDefault();
+            alternarTema();
+        });
+    }
+});
