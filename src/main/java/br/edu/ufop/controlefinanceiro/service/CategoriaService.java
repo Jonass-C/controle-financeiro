@@ -23,6 +23,22 @@ public class CategoriaService {
     private final UsuarioRepository usuarioRepository;
     private final TransacaoRepository transacaoRepository;
 
+    public void gerarCategoriasPadrao(Usuario usuario) {
+        List<String> nomesPadrao = List.of(
+                "Alimentação", "Compras", "Educação", "Investimentos",
+                "Lazer", "Moradia", "Salário", "Saúde", "Transporte"
+        );
+
+        List<Categoria> categoriasPadrao = nomesPadrao.stream()
+                .map(nome -> Categoria.builder()
+                        .nome(nome)
+                        .usuario(usuario)
+                        .build())
+                .toList();
+
+        categoriaRepository.saveAll(categoriasPadrao);
+    }
+
     public CategoriaResponse criar(CategoriaRequest request, Integer usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado"));

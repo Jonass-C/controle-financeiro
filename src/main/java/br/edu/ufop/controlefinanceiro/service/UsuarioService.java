@@ -19,6 +19,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordService passwordService;
     private final TokenService tokenService;
+    private final CategoriaService categoriaService;
 
     @Value("${app.security.dev-mode:true}")
     private boolean devMode;
@@ -48,9 +49,10 @@ public class UsuarioService {
                 .build();
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
+        categoriaService.gerarCategoriasPadrao(usuario);
 
         String token = tokenService.gerarToken(usuarioSalvo);
-        return new UsuarioResponse(usuarioSalvo.getId(), usuarioSalvo.getIdentificadorLogin(), token);
+        return new UsuarioResponse(usuarioSalvo.getId(), usuarioSalvo.getIdentificadorLogin(), usuarioSalvo.getNome(), token);
     }
 
     public UsuarioResponse autenticar(LoginRequest request) {
@@ -63,6 +65,6 @@ public class UsuarioService {
         }
 
         String token = tokenService.gerarToken(usuario);
-        return new UsuarioResponse(usuario.getId(), usuario.getIdentificadorLogin(), token);
+        return new UsuarioResponse(usuario.getId(), usuario.getIdentificadorLogin(), usuario.getNome(), token);
     }
 }
