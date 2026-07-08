@@ -1,8 +1,6 @@
 package br.edu.ufop.controlefinanceiro.service;
 
-import br.edu.ufop.controlefinanceiro.controller.dto.CadastroRequest;
-import br.edu.ufop.controlefinanceiro.controller.dto.LoginRequest;
-import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioResponse;
+import br.edu.ufop.controlefinanceiro.controller.dto.*;
 import br.edu.ufop.controlefinanceiro.domain.Usuario;
 import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
@@ -66,5 +64,50 @@ public class UsuarioService {
 
         String token = tokenService.gerarToken(usuario);
         return new UsuarioResponse(usuario.getId(), usuario.getIdentificadorLogin(), usuario.getNome(), token);
+    }
+
+    public UsuarioResponse editarPerfil(EditarPerfilRequest request, Integer usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado."));
+
+        if (!usuario.getIdentificadorLogin().equals(request.getIdentificadorLogin()) &&
+                usuarioRepository.existsByIdentificadorLogin(request.getIdentificadorLogin())) {
+            throw new RegraDeNegocioException("Este identificador já está em uso.");
+        }
+
+        usuario.setNome(request.getNome());
+        usuario.setIdentificadorLogin(request.getIdentificadorLogin());
+
+        usuarioRepository.save(usuario);
+
+        String token = tokenService.gerarToken(usuario);
+        return new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getIdentificadorLogin(), token);
+    }
+
+    public void alterarSenha(AlterarSenhaRequest request, Integer usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado"));
+
+        boolean senhaCorreta = passwordService.verificarSenha(request.getSenhaAtual(), usuario.getHashSenha(), usuario.getSalt());
+        if (!senhaCorreta) {
+            throw new RegraDeNegocioException("A senha atual informada está incorreta.");
+        }
+
+        int tamanhoMinimo = devMode ? 1 : 6;
+        if (request.getNovaSenha().length() < tamanhoMinimo) {
+            throw new RegraDeNegocioException("A senha deve conter no mínimo " + tamanhoMinimo + " caracteres.");
+        }
+
+        if (!request.getNovaSenha().equals(request.getConfirmacaoNovaSenha())) {
+            throw new RegraDeNegocioException("As senhas não coincidem.");
+        }
+
+        String salt = passwordService.gerarSalt();
+        String hashSenha = passwordService.hashSenha(request.getNovaSenha(), salt);
+
+        usuario.setSalt(salt);
+        usuario.setHashSenha(hashSenha);
+
+        usuarioRepository.save(usuario);
     }
 }
