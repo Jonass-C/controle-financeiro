@@ -5,11 +5,13 @@ import br.edu.ufop.controlefinanceiro.controller.dto.TransacaoResponse;
 import br.edu.ufop.controlefinanceiro.domain.Categoria;
 import br.edu.ufop.controlefinanceiro.domain.Transacao;
 import br.edu.ufop.controlefinanceiro.domain.Usuario;
+import br.edu.ufop.controlefinanceiro.domain.enums.Tipo;
 import br.edu.ufop.controlefinanceiro.exception.RegraDeNegocioException;
 import br.edu.ufop.controlefinanceiro.repository.CategoriaRepository;
 import br.edu.ufop.controlefinanceiro.repository.TransacaoRepository;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -53,14 +55,25 @@ public class TransacaoService {
         return converterParaResponse(transacaoSalva);
     }
 
-    public List<TransacaoResponse> listar(Integer usuarioId) {
+    public List<TransacaoResponse> listar(Integer usuarioId, String ordem) {
         if (!usuarioRepository.existsById(usuarioId)) {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        List<Transacao> transacoes = transacaoRepository.findByUsuarioIdOrderByCriadoEmDesc(usuarioId);
-        List<TransacaoResponse> listaResponse = new ArrayList<>();
+        List<Transacao> transacoes;
 
+        if (ordem.equalsIgnoreCase("receitas")) {
+            transacoes = transacaoRepository.findByUsuarioIdAndTipoOrderByCriadoEmDesc(usuarioId, Tipo.RECEITA);
+        }
+        else if (ordem.equalsIgnoreCase("despesas")) {
+            transacoes = transacaoRepository.findByUsuarioIdAndTipoOrderByCriadoEmDesc(usuarioId, Tipo.DESPESA);
+        }
+        else {
+            Sort sort = determinarOrdem(ordem);
+            transacoes = transacaoRepository.findByUsuarioId(usuarioId, sort);
+        }
+
+        List<TransacaoResponse> listaResponse = new ArrayList<>();
         for (Transacao transacao : transacoes) {
             listaResponse.add(converterParaResponse(transacao));
         }
@@ -128,5 +141,22 @@ public class TransacaoService {
         if(valor <= 0.0) {
             throw new RegraDeNegocioException("O valor deve ser positivo.");
         }
+    }
+
+    private Sort determinarOrdem(String ordem) {
+        if (ordem == null || ordem.isBlank()) {
+            return Sort.by(Sort.Direction.DESC, "criadoEm");
+        }
+
+        return switch (ordem.trim().toLowerCase()) {
+            case "recentes" -> Sort.by(Sort.Direction.DESC, "criadoEm");
+            case "antigas" -> Sort.by(Sort.Direction.ASC, "criadoEm");
+            case "data_desc" -> Sort.by(Sort.Direction.DESC, "data");
+            case "data_asc" -> Sort.by(Sort.Direction.ASC, "data");
+            case "maior_valor" -> Sort.by(Sort.Direction.DESC, "valor");
+            case "menor_valor" -> Sort.by(Sort.Direction.ASC, "valor");
+            case "categoria" -> Sort.by(Sort.Direction.ASC, "categoria.nome").and(Sort.by(Sort.Direction.DESC, "data"));
+            default -> Sort.by(Sort.Direction.DESC, "criadoEm");
+        };
     }
 }
