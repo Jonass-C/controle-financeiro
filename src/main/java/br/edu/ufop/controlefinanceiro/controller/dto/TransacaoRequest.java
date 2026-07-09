@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class TransacaoFormRequest {
+public class TransacaoRequest {
     @NotBlank(message = "Informe o título da transação.")
     @Size(max = 255, message = "O título deve ter no máximo 255 caracteres.")
     private String titulo;
@@ -28,10 +28,6 @@ public class TransacaoFormRequest {
     @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
     private String descricao;
 
-    @NotNull(message = "O ID da categoria é obrigatório.")
-    private Integer categoriaId;
-
-    // TODO: remover este atributo daqui e fazer a autenticação/sessão seguindo boas práticas de segurança
-    @NotNull(message = "O ID do usuário é obrigatório.")
-    private Integer usuarioId;
+    @NotBlank(message = "Informe o nome da categoria.")
+    private String categoriaNome;
 }

@@ -9,6 +9,10 @@ Content-Type: application/json
   "confirmacaoSenha": "senha123"
 }
 
+> {%
+    client.global.set("token", response.body.token);
+%}
+
 ### Teste 2: Tentar cadastrar usuário já existente
 POST http://localhost:8080/usuarios/cadastro
 Content-Type: application/json
@@ -31,25 +35,7 @@ Content-Type: application/json
   "confirmacaoSenha": "senha_diferente"
 }
 
-### Teste 4: Tentar login com senha errada
-POST http://localhost:8080/usuarios/login
-Content-Type: application/json
-
-{
-  "identificadorLogin": "admin@ufop.br",
-  "senhaPura": "senha_errada"
-}
-
-### Teste 5: Tentar login com sucesso
-POST http://localhost:8080/usuarios/login
-Content-Type: application/json
-
-{
-  "identificadorLogin": "admin@ufop.br",
-  "senhaPura": "senha123"
-}
-
-### Teste 6: Tentar cadastrar com DTO inválido (campos vazios, senha curta e sem nome)
+### Teste 4: Tentar cadastrar com DTO inválido (campos vazios, senha curta e sem nome)
 POST http://localhost:8080/usuarios/cadastro
 Content-Type: application/json
 
@@ -59,9 +45,78 @@ Content-Type: application/json
   "confirmacaoSenha": ""
 }
 
-### Teste 7: Criar uma Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
+### Teste 5: Tentar login com senha errada
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha_errada"
+}
+
+### Teste 6: Tentar login com sucesso
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "admin@ufop.br",
+  "senhaPura": "senha123"
+}
+
+> {%
+    client.global.set("token", response.body.token);
+%}
+
+### Teste 7: Tentar listar categorias SEM TOKEN (Erro 403 Forbidden ou 401 Unauthorized)
+GET http://localhost:8080/categorias
+Content-Type: application/json
+
+### Teste 8: Criar uma nova categoria personalizada
+POST http://localhost:8080/categorias
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Academia"
+}
+
+### Teste 9: Listar Categorias para Nova Transação
+GET http://localhost:8080/categorias
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Teste 10: Listar Categorias para Gestão (com contagem)
+GET http://localhost:8080/categorias/gestao
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Teste 11: Tentar criar uma categoria com nome duplicado (dá erro)
+POST http://localhost:8080/categorias
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Academia"
+}
+
+### Teste 12: Editar nome da Categoria (ID 10 = Academia -> Crossfit)
+PUT http://localhost:8080/categorias/10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Crossfit"
+}
+
+### Teste 13: Excluir a Categoria (ID 10)
+DELETE http://localhost:8080/categorias/10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Teste 14: Criar uma Transação
 POST http://localhost:8080/transacoes
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "titulo": "Pão",
@@ -69,13 +124,13 @@ Content-Type: application/json
   "valor": 20,
   "tipo": "DESPESA",
   "descricao": "pãozin",
-  "categoriaId": 1,
-  "usuarioId": 1
+  "categoriaNome": "Alimentação"
 }
 
-### Teste 8: Editar uma Transação
+### Teste 15: Editar uma Transação
 PUT http://localhost:8080/transacoes/1
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "titulo": "Pãozin de queijo",
@@ -83,28 +138,187 @@ Content-Type: application/json
   "valor": 20.0,
   "tipo": "DESPESA",
   "descricao": "pãozin de queijo",
-  "categoriaId": 1,
-  "usuarioId": 1
+  "categoriaNome": "Lazer"
 }
 
-### Teste 9: Criar outra Transação (de forma errada, pois tenho que mudar para obter o id de usuário a partir da sessão)
+### Teste 16: Criar outra Transação
 POST http://localhost:8080/transacoes
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "titulo": "Busão",
-  "data": "2026-06-24",
+  "data": "2026-06-20",
   "valor": 16.50,
   "tipo": "DESPESA",
   "descricao": "",
-  "categoriaId": 3,
-  "usuarioId": 1
+  "categoriaNome": "Transporte"
 }
 
-### Teste 10: Listar Transações do Usuário 1
-GET http://localhost:8080/transacoes?idUsuario=1
+### Teste 17: Listar Transações do Usuário 1
+GET http://localhost:8080/transacoes
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
-### Teste 11: Excluir a Transação 2
+### Teste 18: Excluir a Transação 2
 DELETE http://localhost:8080/transacoes/2
 Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Teste 19: Tentar alterar senha informando a senha incorreta (Erro 400)
+PUT http://localhost:8080/usuarios/senha
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "senhaAtual": "senha_errada_qualquer",
+  "novaSenha": "nova_senha_123",
+  "confirmacaoNovaSenha": "nova_senha_123"
+}
+
+### Teste 20: Tentar alterar senha com confirmação errada (Erro 400)
+PUT http://localhost:8080/usuarios/senha
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "senhaAtual": "senha123",
+  "novaSenha": "nova_senha_123",
+  "confirmacaoNovaSenha": "outra_senha_qualquer"
+}
+
+### Teste 21: Alterar Senha com Sucesso
+PUT http://localhost:8080/usuarios/senha
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "senhaAtual": "senha123",
+  "novaSenha": "novasenha",
+  "confirmacaoNovaSenha": "novasenha"
+}
+
+### Teste 22: Editar o perfil do usuário com sucesso
+PUT http://localhost:8080/usuarios/perfil
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "    Teste",
+  "identificadorLogin": "teste@financeiro.com"
+}
+
+> {%
+    client.global.set("token", response.body.token); // retorna um novo token
+%}
+
+### Teste 23: Tentar fazer login com a senha antiga (Erro 400)
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "teste@financeiro.com",
+  "senhaPura": "senha123"
+}
+
+### Teste 24: Fazer login com a nova senha para revalidar a sessão
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "teste@financeiro.com",
+  "senhaPura": "novasenha"
+}
+
+> {%
+    client.global.set("token", response.body.token);
+%}
+
+### Teste 25: Criar Transação com Categoria inexistente (Testando o Find-or-Create)
+POST http://localhost:8080/transacoes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "titulo": "Compra de Hardware",
+  "data": "2026-07-09",
+  "valor": 1450.00,
+  "tipo": "DESPESA",
+  "descricao": "SSD NVMe 2TB para o setup",
+  "categoriaNome": "  Investimento Profissional  "
+}
+
+### Teste 26: Criar Transação de Receita para aumentar base de testes
+POST http://localhost:8080/transacoes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "titulo": "Bolsa de Pesquisa CNPq",
+  "data": "2026-07-01",
+  "valor": 2100.00,
+  "tipo": "RECEITA",
+  "descricao": "Bolsa de iniciação científica",
+  "categoriaNome": "Salário"
+}
+
+### Teste 27: Listar Transações (Padrão - Mais Recentes por criadoEm)
+GET http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+
+### Teste 28: Listar Transações (Mais Antigas por criadoEm)
+GET http://localhost:8080/transacoes?ordem=antigas
+Authorization: Bearer {{token}}
+
+### Teste 29: Listar por Data da Transação (Mais recentes no calendário)
+GET http://localhost:8080/transacoes?ordem=data_desc
+Authorization: Bearer {{token}}
+
+### Teste 30: Listar por Data da Transação (Mais antigas no calendário)
+GET http://localhost:8080/transacoes?ordem=data_asc
+Authorization: Bearer {{token}}
+
+### Teste 31: Listar pelos Maiores Valores Financeiros
+GET http://localhost:8080/transacoes?ordem=maior_valor
+Authorization: Bearer {{token}}
+
+### Teste 32: Listar pelos Menores Valores Financeiros
+GET http://localhost:8080/transacoes?ordem=menor_valor
+Authorization: Bearer {{token}}
+
+### Teste 33: Listar apenas RECEITAS
+GET http://localhost:8080/transacoes?ordem=receitas
+Authorization: Bearer {{token}}
+
+### Teste 34: Listar apenas DESPESAS
+GET http://localhost:8080/transacoes?ordem=despesas
+Authorization: Bearer {{token}}
+
+### Teste 35: Listar Agrupado por Categoria (Ordem Alfabética + Data)
+GET http://localhost:8080/transacoes?ordem=categoria
+Authorization: Bearer {{token}}
+
+### Teste 36: Teste de Resiliência (Enviar parâmetro inválido deve cair no fallback 'recentes')
+GET http://localhost:8080/transacoes?ordem=parametro_que_nao_existe
+Authorization: Bearer {{token}}
+
+### Teste 37: Efetuar Logout com sucesso (O token é inserido na Denylist)
+POST http://localhost:8080/usuarios/logout
+Authorization: Bearer {{token}}
+
+### Teste 38: Tentar listar Transações usando o Token que acabou de ser Revogado (Erro 401)
+GET http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+
+### Teste 39: Reautenticar no sistema com nova sessão
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "teste@financeiro.com",
+  "senhaPura": "novasenha"
+}
+
+> {%
+    client.global.set("token", response.body.token); // retorna um novo token
+%}

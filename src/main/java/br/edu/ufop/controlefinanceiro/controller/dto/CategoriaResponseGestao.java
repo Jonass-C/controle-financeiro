@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UsuarioResponse {
+public class CategoriaResponseGestao {
     private Integer id;
-    private String identificadorLogin;
     private String nome;
-    private String token;
+    private Integer usuarioId;
+    private int quantidadeTransacoes;
 }
