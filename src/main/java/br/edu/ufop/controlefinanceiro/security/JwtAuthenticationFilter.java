@@ -20,14 +20,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
     private final UsuarioRepository usuarioRepository;
+    private final TokenDenyListService tokenDenyListService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = recuperarToken(request);
 
         if (token != null) {
+            if (tokenDenyListService.isRevogado(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"erro\": \"Sessão encerrada por logout. Efetue login novamente.\"}");
+                return;
+            }
+
             String identificadorLogin = tokenService.validarToken(token);
 
             if (identificadorLogin != null) {

@@ -2,7 +2,10 @@ package br.edu.ufop.controlefinanceiro.controller;
 
 import br.edu.ufop.controlefinanceiro.controller.dto.*;
 import br.edu.ufop.controlefinanceiro.domain.Usuario;
+import br.edu.ufop.controlefinanceiro.security.TokenDenyListService;
+import br.edu.ufop.controlefinanceiro.security.TokenService;
 import br.edu.ufop.controlefinanceiro.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,12 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+
 @RestController
 @RequestMapping("/usuarios")
 @RequiredArgsConstructor
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final TokenService tokenService;
+    private final TokenDenyListService tokenDenyListService;
 
     @PostMapping("/cadastro")
     public ResponseEntity<UsuarioResponse> cadastrar(@Valid @RequestBody CadastroRequest request) {
@@ -38,6 +45,17 @@ public class UsuarioController {
     @PutMapping("/senha")
     public ResponseEntity<UsuarioResponse> alterarSenha(@Valid @RequestBody AlterarSenhaRequest request, @AuthenticationPrincipal Usuario usuarioLogado) {
         usuarioService.alterarSenha(request, usuarioLogado.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")){
+            String token = authHeader.substring(7);
+            Instant expiracao = tokenService.extrairDataExpiracao(token);
+            tokenDenyListService.revogarToken(token, expiracao);
+        }
         return ResponseEntity.noContent().build();
     }
 }

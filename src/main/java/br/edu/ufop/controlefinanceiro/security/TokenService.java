@@ -44,6 +44,20 @@ public class TokenService {
         }
     }
 
+    public Instant extrairDataExpiracao(String tokenJWT) {
+        try {
+            Algorithm algoritmo = Algorithm.HMAC256(secret);
+            return JWT.require(algoritmo)
+                    .withIssuer("controle-financeiro-api")
+                    .build()
+                    .verify(tokenJWT)
+                    .getExpiresAt()
+                    .toInstant();
+        } catch (JWTVerificationException exception) {
+            return Instant.now();
+        }
+    }
+
     private Instant dataExpiracao() {
         return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }
