@@ -90,10 +90,6 @@ public class CategoriaService {
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(categoriaId, usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
-        if (categoria.getUsuario() == null) {
-            throw new RegraDeNegocioException("Categorias padrão não podem ser editadas.");
-        }
-
         if (!categoria.getNome().equalsIgnoreCase(request.getNome())) {
             if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome().trim(), usuarioId)) {
                 throw new RegraDeNegocioException("Você já possui uma categoria com este nome.");

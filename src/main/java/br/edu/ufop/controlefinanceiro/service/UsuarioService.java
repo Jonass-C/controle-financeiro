@@ -54,7 +54,7 @@ public class UsuarioService {
     }
 
     public UsuarioResponse autenticar(LoginRequest request) {
-        Usuario usuario = usuarioRepository.findByIdentificadorLogin(request.getIdentificadorLogin())
+        Usuario usuario = usuarioRepository.findByIdentificadorLogin(request.getIdentificadorLogin().trim())
                 .orElseThrow(() -> new RegraDeNegocioException("Identificador ou senha incorretos."));
 
         boolean senhaCorreta = passwordService.verificarSenha(request.getSenhaPura(), usuario.getHashSenha(), usuario.getSalt());
@@ -70,18 +70,18 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado."));
 
-        if (!usuario.getIdentificadorLogin().equals(request.getIdentificadorLogin()) &&
-                usuarioRepository.existsByIdentificadorLogin(request.getIdentificadorLogin())) {
+        if (!usuario.getIdentificadorLogin().equals(request.getIdentificadorLogin().trim()) &&
+                usuarioRepository.existsByIdentificadorLogin(request.getIdentificadorLogin().trim())) {
             throw new RegraDeNegocioException("Este identificador já está em uso.");
         }
 
-        usuario.setNome(request.getNome());
-        usuario.setIdentificadorLogin(request.getIdentificadorLogin());
+        usuario.setNome(request.getNome().trim());
+        usuario.setIdentificadorLogin(request.getIdentificadorLogin().trim());
 
         usuarioRepository.save(usuario);
 
         String token = tokenService.gerarToken(usuario);
-        return new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getIdentificadorLogin(), token);
+        return new UsuarioResponse(usuario.getId(), usuario.getIdentificadorLogin(), usuario.getNome(), token);
     }
 
     public void alterarSenha(AlterarSenhaRequest request, Integer usuarioId) {
