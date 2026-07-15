@@ -1161,3 +1161,181 @@ body.light .modal-content::-webkit-scrollbar-thumb:hover {
     color: inherit;
     font-family: inherit;
 }
+
+
+.cabecalho-dash {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.cabecalho-dash h2 {
+    margin-bottom: 15px;
+}
+
+.dash-filtros {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-filtro {
+    background: var(--container-bg);
+    border: 1px solid var(--borda-cor);
+    color: var(--texto-secundario);
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btn-filtro:hover {
+    border-color: #00C853;
+    color: var(--texto-principal);
+}
+
+.btn-filtro.ativo {
+    background: #00C853;
+    color: #fff;
+    border-color: #00C853;
+}
+
+.dash-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.dash-card {
+    background: var(--container-bg);
+    border: 1px solid var(--borda-cor);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-cards);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    transition: transform 0.2s ease, border-color 0.2s;
+}
+
+.dash-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 200, 83, 0.4);
+}
+
+.dash-card span {
+    font-size: 13px;
+    color: var(--texto-secundario);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dash-card h3 {
+    font-size: 24px;
+    color: var(--texto-principal);
+    word-break: break-all;
+}
+
+.dash-charts {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dash-chart-container {
+    background: var(--container-bg);
+    border: 1px solid var(--borda-cor);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-cards);
+}
+
+.dash-chart-container h4 {
+    margin-bottom: 20px;
+    color: var(--texto-principal);
+    font-weight: 600;
+    text-align: center;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.chart-box {
+    background: var(--container-bg);
+    border: 1px solid var(--borda-cor);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-cards);
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 900px) {
+    .grid-2-col {
+        grid-template-columns: 1fr;
+    }
+    .chart-wrapper {
+        height: 250px;
+    }
+}
+
+#dash-receitas {
+    color: #00C853;
+}
+
+#dash-despesas,
+body.light #dash-despesas {
+    color: #ff3b3b;
+}
+
+#chart-pizza-vazio {
+    display: none;
+    text-align: center;
+    color: var(--texto-secundario);
+    margin-top: 80px;
+}
+
+:root {
+    --grafico-receita: #00C853;
+    --grafico-receita-bg: rgba(0, 200, 83, 0.1);
+    --grafico-despesa: #ff3b3b;
+    --grafico-fonte: 'Poppins', sans-serif;
+    --grafico-p1: #FF6384;
+    --grafico-p2: #36A2EB;
+    --grafico-p3: #FFCE56;
+    --grafico-p4: #4BC0C0;
+    --grafico-p5: #9966FF;
+    --grafico-p6: #FF9F40;
+    --grafico-p7: #E7E9ED;
+    --grafico-p8: #8D6E63;
+}
+
+body {
+    --grafico-texto: #B3B3B3;
+    --grafico-grid: rgba(255, 255, 255, 0.06);
+}
+
+body.light {
+    --grafico-texto: #475569;
+    --grafico-grid: rgba(0, 0, 0, 0.06);
+}
