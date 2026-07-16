@@ -1161,3 +1161,49 @@ body.light .modal-content::-webkit-scrollbar-thumb:hover {
     color: inherit;
     font-family: inherit;
 }
+.alerta-texto-sucesso {
+    color: #28a745;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 15px;
+    display: block;
+}
+
+.alerta-texto-erro {
+    color: #dc3545;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 15px;
+    display: block;
+}
+
+#container-senha.escondido {
+    display: none !important;
+}
+
+#btn-alterar-senha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+#container-senha {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.botoes-container-senha {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.botoes-container-senha button {
+    flex: 1;
+}}

@@ -26,6 +26,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/", "/index.html", "/cadastro.html", "/gestao.html", "/css/**", "/js/**", "/img/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuarios/cadastro", "/usuarios/login").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/senha").authenticated()
+                        .requestMatchers("/transacoes/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/usuarios/logout").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
