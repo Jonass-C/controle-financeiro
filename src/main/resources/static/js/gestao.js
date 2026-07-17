@@ -1,4 +1,3 @@
-
 let fp;
 let linhaEditando = null;
 let linhaExcluir = null;
@@ -832,9 +831,7 @@ function carregarCategoriasParaSelect() {
             return res.json();
         })
         .then(lista => {
-            const listaOrdenada = lista.sort((a, b) =>
-                a.nome.localeCompare(b.nome)
-            );
+            const listaOrdenada = lista.sort((a, b) => a.nome.localeCompare(b.nome));
             console.log("Dados que chegaram no JS:", listaOrdenada);
             atualizarSelectNovaTransacao(listaOrdenada, true);
         })
@@ -851,6 +848,7 @@ function carregarCategoriasParaGestao() {
                 alert("Sessão expirada!");
                 window.location.href = "index.html";
                 return Promise.reject("Não autorizado");
+            }
             if (!response.ok) throw new Error("Erro na requisição");
             return response.json();
         })
@@ -863,7 +861,6 @@ function carregarCategoriasParaGestao() {
             }
         });
 }
-
 function verificarResposta(response) {
     if (response.status === 401) {
         console.error("Token expirado ou inválido!");
@@ -978,6 +975,7 @@ function atualizarListaGestaoCategorias(categorias) {
         containerLista.appendChild(item);
     });
 }
+
 function exibirMensagemModal(mensagem, tipo = "sucesso") {
     let alerta = document.getElementById("alerta-modal-perfil");
     if (!alerta) {
@@ -988,17 +986,17 @@ function exibirMensagemModal(mensagem, tipo = "sucesso") {
         const containerInterno = document.querySelector("#modal-perfil > div") ||
             document.querySelector(".modal-conteudo") ||
             document.getElementById("modal-perfil") ||
-            modalPerfil;
+            (typeof modalPerfil !== 'undefined' ? modalPerfil : null);
 
         if (containerInterno) {
-            // containerInterno.appendChild(alerta);
             containerInterno.prepend(alerta);
         }
     }
 
-    // alerta.textContent = message = mensagem;
-    alerta.textContent = mensagem;
-    alerta.className = `alerta-texto-${tipo}`;
+    if (alerta) {
+        alerta.textContent = mensagem;
+        alerta.className = `alerta-texto-${tipo}`;
+    }
 
     setTimeout(() => {
         if (alerta) alerta.remove();
@@ -1060,8 +1058,8 @@ function configurarEdicaoPerfilBackend() {
     if (displayEmail) displayEmail.textContent = localStorage.getItem("identificadorLogin") || "";
 
     window.habilitarEdicaoPerfilCompleto = function() {
-        const nomeAtual = displayNome.textContent;
-        const emailAtual = displayEmail.textContent;
+        const nomeAtual = displayNome ? displayNome.textContent : "";
+        const emailAtual = displayEmail ? displayEmail.textContent : "";
 
         linhaNome.innerHTML = `
             <div class="container-edicao-perfil" style="width: 100%;">
@@ -1076,7 +1074,6 @@ function configurarEdicaoPerfilBackend() {
                 <input type="text" id="input-email-perfil" class="input-perfil" value="${emailAtual}" style="flex: 1;">
             </div>
         `;
-        const containerAcoes = document.getElementById("container-botoes-perfil") || linhaNome.parentElement;
 
         let areaBotoes = document.getElementById("controles-edicao-perfil");
         if (!areaBotoes) {
@@ -1102,8 +1099,12 @@ function configurarEdicaoPerfilBackend() {
     };
 
     window.salvarAlteracoesPerfilBackend = function() {
-        const novoNome = document.getElementById("input-nome-perfil").value.trim();
-        const novoEmail = document.getElementById("input-email-perfil").value.trim();
+        const inputNome = document.getElementById("input-nome-perfil");
+        const inputEmail = document.getElementById("input-email-perfil");
+        if (!inputNome || !inputEmail) return;
+
+        const novoNome = inputNome.value.trim();
+        const novoEmail = inputEmail.value.trim();
         const token = obterToken();
 
         if (!novoNome || !novoEmail) {
@@ -1179,113 +1180,46 @@ function configurarEdicaoPerfilBackend() {
     });
 }
 
+function limparCamposSenha() {
+    const atual = document.getElementById("senha-atual");
+    const nova = document.getElementById("nova-senha");
+    const confirmInput = document.getElementById("confirmar-senha");
+    if (atual) atual.value = "";
+    if (nova) nova.value = "";
+    if (confirmInput) confirmInput.value = "";
+}
+
 function configurarEdicaoSenhaBackend() {
+    const btnAlterarSenha = document.getElementById("btn-alterar-senha");
+    const containerSenha = document.getElementById("container-senha");
+    const btnCancelarSenha = document.getElementById("btn-cancelar-senha");
+    const btnSalvarSenha = document.getElementById("btn-salvar-senha");
+
     if (!btnAlterarSenha) return;
 
     btnAlterarSenha.addEventListener("click", () => {
         btnAlterarSenha.style.display = "none";
-        containerSenha.classList.remove("escondido");
+        if (containerSenha) containerSenha.classList.remove("escondido");
     });
 
     if (btnCancelarSenha) {
         btnCancelarSenha.addEventListener("click", () => {
-            containerSenha.classList.add("escondido");
+            if (containerSenha) containerSenha.classList.add("escondido");
             btnAlterarSenha.style.display = "flex";
             limparCamposSenha();
         });
     }
 
-    /*
-    if (btnSalvarSenha) {
-        btnSalvarSenha.addEventListener("click", () => {
-            const token = obterToken();
-            const senhaAtual = document.getElementById("senha-atual").value;
-            const novaSenha = document.getElementById("nova-senha").value;
-            const confirmacaoNovaSenha = document.getElementById("confirmar-senha")
-                ? document.getElementById("confirmar-senha").value
-                : "";
-
-            if (!senhaAtual || !novaSenha || !confirmacaoNovaSenha) {
-                exibirMensagemModal("Preencha todos os campos de senha!", "erro");
-                return;
-            }
-
-            if (novaSenha.length < 6) {
-                exibirMensagemModal("A nova senha deve ter no mínimo 6 caracteres!", "erro");
-                return;
-            }
-
-            if (novaSenha !== confirmacaoNovaSenha) {
-                exibirMensagemModal("A nova senha e a confirmação não coincidem!", "erro");
-                return;
-            }
-
-     */
-            /*
-            fetch('/usuarios/senha', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    senhaAtual: senhaAtual,
-                    novaSenha: novaSenha,
-                    confirmacaoNovaSenha: novaSenha
-                })
-            })
-                .then(async response => {
-                    if (!response.ok) {
-                        const textoErro = await response.text();
-                        throw new Error(textoErro || "Erro ao alterar senha.");
-                    }
-                    exibirMensagemModal("Senha alterada com sucesso!", "sucesso");
-                    btnCancelarSenha.click();
-                })
-                .catch(erro => {
-                    exibirMensagemModal(erro.message, "erro");
-                });
-
-             */
-    /*
-            fetch('/usuarios/senha', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    senhaAtual: senhaAtual,
-                    novaSenha: novaSenha,
-                    confirmacaoNovaSenha: novaSenha
-                })
-            })
-                .then(async response => {
-                    if (!response.ok) {
-                        const textoErro = await response.text();
-                        throw new Error(textoErro || "Erro ao alterar senha.");
-                    }
-
-                    exibirMensagemModal("Senha alterada com sucesso!", "sucesso");
-
-                    setTimeout(() => {
-                        btnCancelarSenha.click();
-                    }, 1500);
-                })
-                .catch(erro => {
-                    exibirMensagemModal(erro.message, "erro");
-                });
-
-        });
-    }*/
     if (btnSalvarSenha) {
         btnSalvarSenha.addEventListener("click", async () => {
             const token = obterToken();
-            const senhaAtual = document.getElementById("senha-atual").value;
-            const novaSenha = document.getElementById("nova-senha").value;
-            const confirmacaoNovaSenha = document.getElementById("confirmar-senha")
-                ? document.getElementById("confirmar-senha").value
-                : "";
+            const elSenhaAtual = document.getElementById("senha-atual");
+            const elNovaSenha = document.getElementById("nova-senha");
+            const elConfirmarSenha = document.getElementById("confirmar-senha");
+
+            const senhaAtual = elSenhaAtual ? elSenhaAtual.value : "";
+            const novaSenha = elNovaSenha ? elNovaSenha.value : "";
+            const confirmacaoNovaSenha = elConfirmarSenha ? elConfirmarSenha.value : "";
 
             if (!senhaAtual || !novaSenha || !confirmacaoNovaSenha) {
                 exibirMensagemModal("Preencha todos os campos!", "erro");
@@ -1324,22 +1258,21 @@ function configurarEdicaoSenhaBackend() {
                 if (!response.ok) {
                     throw new Error(respostaTexto || "Erro ao alterar senha.");
                 }
+
                 exibirMensagemModal("Senha alterada com sucesso!", "sucesso");
 
                 setTimeout(() => {
-                    btnCancelarSenha.click();
+                    if (btnCancelarSenha) btnCancelarSenha.click();
                 }, 1500);
 
             } catch (erro) {
                 let mensagemFinal = erro.message;
-
                 try {
                     const erroJson = JSON.parse(erro.message);
                     if (erroJson.detail) {
                         mensagemFinal = erroJson.detail;
                     }
-                } catch (e) {
-                }
+                } catch (e) {}
 
                 exibirMensagemModal(mensagemFinal, "erro");
             } finally {
@@ -1347,60 +1280,8 @@ function configurarEdicaoSenhaBackend() {
             }
         });
     }
-    function limparCamposSenha() {
-        document.getElementById("senha-atual").value = "";
-        document.getElementById("nova-senha").value = "";
-        const confirmInput = document.getElementById("confirmar-senha");
-        if (confirmInput) confirmInput.value = "";
-    }
 }
 
-document.getElementById("btn-salvar-senha").addEventListener("click", function() {
-    const senhaAtual = document.getElementById("senha-atual").value;
-    const novaSenha = document.getElementById("nova-senha").value;
-    const confirmarSenha = document.getElementById("confirmar-senha").value;
-    const token = obterToken();
-
-    if (!senhaAtual || !novaSenha || !confirmarSenha) {
-        exibirMensagemModal("Preencha todos os campos de senha!", "erro");
-        return;
-    }
-    if (novaSenha.length < 6) {
-        exibirMensagemModal("A nova senha deve ter no mínimo 6 caracteres!", "erro");
-        return;
-    }
-    if (novaSenha !== confirmarSenha) {
-        exibirMensagemModal("A nova senha e a confirmação não coincidem!", "erro");
-        return;
-    }
-    fetch('/usuarios/senha', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            senhaAtual: senhaAtual,
-            novaSenha: novaSenha,
-            confirmacaoNovaSenha: novaSenha
-        })
-    })
-        .then(async response => {
-            if (response.ok || response.status === 204) {
-                exibirMensagemModal("Senha alterada com sucesso!", "sucesso");
-                // btnCancelarSenha.click();
-                limparCamposSenha();
-            } else {
-                const erroTexto = await response.text();
-                throw new Error(erroTexto || "Erro ao alterar senha.");
-            }
-        })
-        .catch(erro => {
-            if (!erro.message.includes("sucesso")) {
-                exibirMensagemModal(erro.message, "erro");
-            }
-        });
-});
 window.addEventListener("load", function() {
     carregarCategoriasParaSelect();
     if (typeof carregarTransacoesDoBanco === 'function') {
@@ -1410,8 +1291,9 @@ window.addEventListener("load", function() {
 
 configurarEdicaoPerfilBackend();
 configurarEdicaoSenhaBackend();
-atualizarResumo();
-carregarTransacoesDoBanco();
+
+if (typeof atualizarResumo === 'function') { atualizarResumo(); }
+if (typeof carregarTransacoesDoBanco === 'function') { carregarTransacoesDoBanco(); }
 carregarCategoriasParaSelect();
 
 console.log("Token enviado:", obterToken());
