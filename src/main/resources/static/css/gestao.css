@@ -735,26 +735,40 @@ div.flatpickr-calendar .flatpickr-monthDropdown-month {
     color: var(--texto-principal);
 }
 
-.modal-content::-webkit-scrollbar {
+.modal-content::-webkit-scrollbar,
+.modal-categorias-content::-webkit-scrollbar,
+#lista-categorias::-webkit-scrollbar,
+.modal-dashboard-content::-webkit-scrollbar {
     width: 6px;
 }
 
-.modal-content::-webkit-scrollbar-track {
+.modal-content::-webkit-scrollbar-track,
+.modal-categorias-content::-webkit-scrollbar-track,
+#lista-categorias::-webkit-scrollbar-track,
+.modal-dashboard-content::-webkit-scrollbar-track {
     background: transparent;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
-.modal-content::-webkit-scrollbar-thumb {
+.modal-content::-webkit-scrollbar-thumb,
+.modal-categorias-content::-webkit-scrollbar-thumb,
+#lista-categorias::-webkit-scrollbar-thumb,
+.modal-dashboard-content::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: var(--scrollbar-thumb);
 }
 
 .modal-content::-webkit-scrollbar-thumb:hover,
-body.light .modal-content::-webkit-scrollbar-thumb:hover {
+body.light .modal-content::-webkit-scrollbar-thumb:hover,
+.modal-categorias-content::-webkit-scrollbar-thumb:hover,
+body.light .modal-categorias-content::-webkit-scrollbar-thumb:hover,
+#lista-categorias::-webkit-scrollbar-thumb:hover,
+body.light #lista-categorias::-webkit-scrollbar-thumb:hover,
+.modal-dashboard-content::-webkit-scrollbar-thumb:hover,
+body.light .modal-dashboard-content::-webkit-scrollbar-thumb:hover {
     background: #5EFC82 !important;
 }
-
 @media(max-width:900px){
     .resumo-financeiro {
         grid-template-columns: 1fr;

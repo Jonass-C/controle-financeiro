@@ -46,8 +46,12 @@ public class CategoriaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable("id") Integer categoriaId, @AuthenticationPrincipal Usuario usuarioLogado) {
-        categoriaService.excluir(categoriaId, usuarioLogado.getId());
+    public ResponseEntity<Void> excluir(
+            @PathVariable("id") Integer categoriaId,
+            @RequestParam(value = "transferirPara", required = false) Integer transferirPara,
+            @AuthenticationPrincipal Usuario usuarioLogado
+    ) {
+        categoriaService.excluir(categoriaId, transferirPara, usuarioLogado.getId());
         return ResponseEntity.noContent().build();
     }
 }

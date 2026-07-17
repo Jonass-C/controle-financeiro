@@ -1,6 +1,9 @@
 let fp;
 let linhaEditando = null;
 let linhaExcluir = null;
+let categoriaIdParaExcluir = null;
+let categoriaPrecisaTransferir = false;
+
 const nomeUsuario = localStorage.getItem("nomeUsuario");
 const idUsuario = localStorage.getItem("usuarioId");
 const modal = document.getElementById("modal-transacao");
@@ -34,58 +37,11 @@ const btnSalvarSenha = document.getElementById("btn-salvar-senha");
 const displayNome = document.getElementById("display-nome-perfil");
 const chaveNomePerfil = `perfil_nome_${idUsuario}`;
 
-
-document.addEventListener("DOMContentLoaded", function() {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        alert("Token não encontrado! Redirecionando...");
-        window.location.href = "index.html";
-    } else {
-        carregarTransacoesDoBanco();
-        carregarCategoriasParaSelect();
-        carregarCategoriasParaGestao();
-    }
-});
-
-/*
-const mapaCategorias = {
-     "Alimentação": 1,
-     "Moradia": 2,
-     "Transporte": 3,
-     "Saúde": 4,
-     "Educação": 5,
-     "Lazer": 6,
-     "Compras": 7,
-     "Salário": 8,
-     "Investimentos": 9
-};
-
-const chaveUsuario = `categoriasCustomizadas_${idUsuario}`;
-let categoriasSalvas = JSON.parse(localStorage.getItem(chaveUsuario));
-if (!categoriasSalvas) {
-    categoriasSalvas = Object.keys(mapaCategorias);
-    localStorage.setItem(chaveUsuario, JSON.stringify(categoriasSalvas));
-}
-const select = document.getElementById("categoria");
-categoriasSalvas.sort((a, b) => a.localeCompare(b));
-categoriasSalvas.forEach(cat => {
-    const jaExiste = Array.from(select.options).some(opt => opt.value === cat);
-    if (!jaExiste) {
-        const opt = document.createElement("option");
-        opt.value = cat;
-        opt.textContent = cat;
-        const indiceUltimo = select.options.length - 1;
-        select.insertBefore(opt, select.options[indiceUltimo]);
-    }
-});
-*/
-
 if(nomeUsuario){
     const primeiroNome = nomeUsuario.split(" ")[0];
-    document.getElementById("usuario-nome").textContent = `Olá, ${primeiroNome}`;
+    const divSaudacao = document.getElementById("usuario-nome");
+    if (divSaudacao) divSaudacao.textContent = `Olá, ${primeiroNome}`;
 }
-
 
 function limparFormulario(){
     form.reset();
@@ -120,7 +76,7 @@ abrirDashboard.addEventListener("click", function(){
 });
 
 abrirCategorias.addEventListener("click", function(){
-    atualizarListaCategorias();
+    carregarCategoriasParaGestao();
     modalCategorias.style.display = "flex";
 });
 
@@ -150,10 +106,10 @@ document.getElementById("logout").addEventListener("click", function() {
         .finally(() => {
             localStorage.removeItem("token");
             localStorage.removeItem("idUsuario");
-
             window.location.href = "index.html";
         });
 });
+
 window.addEventListener("click", function(e){
     if(e.target == modal){
         fecharModal();
@@ -165,19 +121,15 @@ window.addEventListener("click", function(e){
     if(e.target == modalDescricao){
         modalDescricao.style.display = "none";
     }
-
     if(e.target == modalDashboard){
         modalDashboard.style.display = "none";
     }
-
     if(e.target == modalCategorias){
         modalCategorias.style.display = "none";
     }
-
     if(!usuarioBtn.contains(e.target) && !menuUsuario.contains(e.target)){
         menuUsuario.classList.remove("ativo");
     }
-
     if(e.target == modalPerfil){
         modalPerfil.style.display = "none";
     }
@@ -265,13 +217,9 @@ btnAdicionarCategoria.addEventListener("click", function () {
         input.focus();
         return;
     }
-    const foiAdicionada = adicionarCategoriaNaLista(nomeCategoria);
-    if (foiAdicionada) {
-        atualizarListaCategorias();
-        input.value = "";
-    } else {
-        alert("Esta categoria já existe!");
-    }
+
+    criarNovaCategoriaNoBackend(nomeCategoria);
+    input.value = "";
     input.focus();
 });
 
@@ -308,117 +256,6 @@ function atualizarListaCategorias() {
                 </button>
             </div>
         `;
-        item.querySelector(".remover-categoria").addEventListener("click", function() {
-            const modalExclusao = document.getElementById("modal-confirmar-exclusao");
-            const textoExclusao = document.getElementById("texto-exclusao-categoria");
-            const areaTransferencia = document.getElementById("area-transferencia-categoria");
-            const selectTransferencia = document.getElementById("select-transferir-categoria");
-            if (qtdTransacoes > 0) {
-                textoExclusao.innerHTML = `Existem <strong>${qtdTransacoes} transação(ões)</strong> usando a categoria "${nomeDaCategoria}".<br>Para qual categoria você deseja movê-las?`;
-                areaTransferencia.style.display = "block";
-                selectTransferencia.innerHTML = "";
-                categoriasSalvas.forEach(cat => {
-                    if(cat !== nomeDaCategoria) {
-                        const opt = document.createElement("option");
-                        opt.value = cat;
-                        opt.textContent = cat;
-                        selectTransferencia.appendChild(opt);
-                    }
-                });
-            } else {
-                textoExclusao.innerHTML = `Tem certeza que deseja excluir a categoria <strong>"${nomeDaCategoria}"</strong> definitivamente?`;
-                areaTransferencia.style.display = "none";
-            }
-            modalExclusao.style.display = "flex";
-            document.getElementById("btn-cancelar-exclusao").onclick = function() {
-                modalExclusao.style.display = "none";
-            };
-            document.getElementById("btn-confirmar-exclusao").onclick = function() {
-                if (qtdTransacoes > 0) {
-                    const novaCat = selectTransferencia.value;
-                    if(novaCat) {
-                        for (let i = 0; i < tabela.rows.length; i++) {
-                            if (tabela.rows[i].cells[2].textContent.trim() === nomeDaCategoria) {
-                                tabela.rows[i].cells[2].textContent = novaCat;
-                            }
-                        }
-                    }
-                }
-                let catsAtualizadas = JSON.parse(localStorage.getItem(chaveUsuario)) || [];
-                catsAtualizadas = catsAtualizadas.filter(c => c !== nomeDaCategoria);
-                localStorage.setItem(chaveUsuario, JSON.stringify(catsAtualizadas));
-                Array.from(select.options).forEach(opt => {
-                    if(opt.value === nomeDaCategoria) opt.remove();
-                });
-                modalExclusao.style.display = "none";
-                atualizarListaCategorias();
-            };
-        });
-        item.querySelector(".editar-categoria").addEventListener("click", function() {
-            item.innerHTML = `
-                <input type="text" value="${nomeDaCategoria}" class="input-edicao-inline">
-                <div class="acoes-categoria">
-                    <button class="confirmar-edicao btn-icone-sucesso" title="Confirmar">
-                        <span class="material-symbols-outlined">check</span>
-                    </button>
-                    <button class="cancelar-edicao btn-icone-perigo" title="Cancelar">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-            `;
-            const inputEdicao = item.querySelector(".input-edicao-inline");
-            inputEdicao.focus();
-            item.querySelector(".cancelar-edicao").addEventListener("click", function() {
-                atualizarListaCategorias();
-            });
-            item.querySelector(".confirmar-edicao").addEventListener("click", function() {
-                const novoNome = inputEdicao.value.trim();
-                if (!novoNome || novoNome === "" || novoNome === nomeDaCategoria) {
-                    atualizarListaCategorias();
-                    return;
-                }
-                const processarEdicao = (atualizarTransacoes) => {
-                    if (atualizarTransacoes && qtdTransacoes > 0) {
-                        for (let i = 0; i < tabela.rows.length; i++) {
-                            if (tabela.rows[i].cells[2].textContent.trim() === nomeDaCategoria) {
-                                tabela.rows[i].cells[2].textContent = novoNome;
-                            }
-                        }
-                    }
-                    let catsAtualizadas = JSON.parse(localStorage.getItem(chaveUsuario)) || [];
-                    const index = catsAtualizadas.indexOf(nomeDaCategoria);
-                    if (index !== -1) catsAtualizadas[index] = novoNome;
-                    localStorage.setItem(chaveUsuario, JSON.stringify(catsAtualizadas));
-                    Array.from(select.options).forEach(opt => {
-                        if(opt.value === nomeDaCategoria) {
-                            opt.value = novoNome;
-                            opt.textContent = novoNome;
-                        }
-                    });
-                    atualizarListaCategorias();
-                };
-                if (qtdTransacoes > 0) {
-                    const modalEdicao = document.getElementById("modal-confirmar-edicao");
-                    const textoEdicao = document.getElementById("texto-edicao-categoria");
-                    textoEdicao.innerHTML = `Esta categoria está ligada a <strong>${qtdTransacoes} transação(ões)</strong>.<br>Deseja alterar o nome de "${nomeDaCategoria}" para "${novoNome}" nelas também?`;
-                    modalEdicao.style.display = "flex";
-                    document.getElementById("btn-nao-atualizar-edicao").onclick = function() {
-                        modalEdicao.style.display = "none";
-                        processarEdicao(false);
-                    };
-                    document.getElementById("btn-sim-atualizar-edicao").onclick = function() {
-                        modalEdicao.style.display = "none";
-                        processarEdicao(true);
-                    };
-                    document.getElementById("btn-cancelar-edicao").onclick = function() {
-                        modalEdicao.style.display = "none";
-                        atualizarListaCategorias();
-                    };
-                } else {
-                    processarEdicao(false);
-                }
-            });
-        });
         listaCategorias.appendChild(item);
     });
 }
@@ -475,7 +312,6 @@ form.addEventListener("submit", function(e){
 
     if (!data || (fp.selectedDates && fp.selectedDates.length === 0)) {
         formularioValido = false;
-
         if (document.getElementById("data")) document.getElementById("data").classList.add("erro-campo");
         if (fp && fp.altInput) fp.altInput.classList.add("erro-campo");
         if (fp && fp.input) fp.input.classList.add("erro-campo");
@@ -485,11 +321,7 @@ form.addEventListener("submit", function(e){
 
         if (anoSelecionado > anoAtual + 5 || anoSelecionado < anoAtual - 5) {
             formularioValido = false;
-
-            if (msgErroData) {
-                msgErroData.style.display = "block";
-            }
-
+            if (msgErroData) msgErroData.style.display = "block";
             if (fp && fp.altInput) fp.altInput.classList.add("erro-campo");
             if (fp && fp.input) fp.input.classList.add("erro-campo");
         }
@@ -519,17 +351,14 @@ form.addEventListener("submit", function(e){
         valor: parseFloat(valor),
         tipo: tipo === "Receita" ? "RECEITA" : "DESPESA",
         descricao: descricao,
-        // categoriaId: idCategoriaDesejado,
         categoriaNome: categoriaFinal,
         usuarioId: parseInt(idUsuario)
     };
 
     const token = localStorage.getItem("token");
-
     const url = linhaEditando ? `/transacoes/${linhaEditando.dataset.id}` : '/transacoes';
     const metodo = linhaEditando ? 'PUT' : 'POST';
 
-    console.log(dadosTransacao)
     fetch(url, {
         method: metodo,
         headers: {
@@ -547,10 +376,6 @@ form.addEventListener("submit", function(e){
             let linha;
 
             adicionarCategoriaNaLista(categoriaFinal);
-
-            let vinculos = JSON.parse(localStorage.getItem(`vinculoCategorias_${idUsuario}`)) || {};
-            vinculos[transacaoSalva.id] = categoriaFinal;
-            localStorage.setItem(`vinculoCategorias_${idUsuario}`, JSON.stringify(vinculos));
 
             if(linhaEditando){
                 linha = linhaEditando;
@@ -590,6 +415,7 @@ form.addEventListener("submit", function(e){
 
             configurarEventosLinha(linha);
             atualizarResumo();
+            atualizarTodaATelaDeCategorias();
             fecharModal();
         })
         .catch(erro => {
@@ -654,16 +480,9 @@ function atualizarResumo(){
 }
 
 const campos = document.querySelectorAll("input, select, textarea");
-
 campos.forEach(function(campo){
-    campo.addEventListener("input", function(){
-            campo.classList.remove("erro-campo");
-        }
-    );
-    campo.addEventListener("change", function(){
-            campo.classList.remove("erro-campo");
-        }
-    );
+    campo.addEventListener("input", function(){ campo.classList.remove("erro-campo"); });
+    campo.addEventListener("change", function(){ campo.classList.remove("erro-campo"); });
 });
 
 fecharDescricao.addEventListener("click", function(){
@@ -671,9 +490,7 @@ fecharDescricao.addEventListener("click", function(){
 });
 
 document.querySelectorAll("img").forEach(function(img){
-    img.addEventListener("contextmenu", function(e){
-        e.preventDefault();
-    });
+    img.addEventListener("contextmenu", function(e){ e.preventDefault(); });
 });
 
 fp = flatpickr("#calendario-container", {
@@ -715,14 +532,11 @@ document.getElementById("calendario-container").addEventListener("input", functi
 });
 
 window.addEventListener('scroll', function() {
-    if (fp && fp.isOpen) {
-        fp.close();
-    }
+    if (fp && fp.isOpen) { fp.close(); }
 }, true);
 
 function carregarTransacoesDoBanco() {
     const token = obterToken();
-
     if (!token) {
         console.warn("Nenhum token JWT de autenticação encontrado no localStorage.");
         return;
@@ -742,7 +556,6 @@ function carregarTransacoesDoBanco() {
         .then(transacoes => {
             const tabela = document.getElementById("tabela-transacoes");
             tabela.innerHTML = "";
-
             transacoes.sort((a, b) => b.id - a.id);
 
             transacoes.forEach(t => {
@@ -778,20 +591,14 @@ function carregarTransacoesDoBanco() {
                     nomeCategoriaExibir = t.categoriaNome;
                 }
 
-                const idUsuarioLocal = localStorage.getItem("idUsuario") || "padrao";
-                const vinculosLocais = JSON.parse(localStorage.getItem(`vinculoCategorias_${idUsuarioLocal}`)) || {};
-
-                if (vinculosLocais[t.id]) {
-                    nomeCategoriaExibir = vinculosLocais[t.id];
-                }
                 linha.cells[2].innerHTML = nomeCategoriaExibir;
                 linha.cells[3].innerHTML = t.tipo === "RECEITA" ? "Receita" : "Despesa";
                 linha.cells[4].innerHTML = "R$ " + t.valor.toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 linha.cells[5].innerHTML = `
-            <button class="btn-acao visualizar" title="Visualizar descrição"><span class="material-symbols-outlined">visibility</span></button>
-            <button class="btn-acao editar" title="Editar transação"><span class="material-symbols-outlined">edit</span></button>
-            <button class="btn-acao excluir" title="Excluir transação"><span class="material-symbols-outlined">delete</span></button>
-        `;
+                <button class="btn-acao visualizar" title="Visualizar descrição"><span class="material-symbols-outlined">visibility</span></button>
+                <button class="btn-acao editar" title="Editar transação"><span class="material-symbols-outlined">edit</span></button>
+                <button class="btn-acao excluir" title="Excluir transação"><span class="material-symbols-outlined">delete</span></button>
+            `;
                 configurarEventosLinha(linha);
             });
             atualizarResumo();
@@ -801,7 +608,6 @@ function carregarTransacoesDoBanco() {
 
 function carregarCategoriasDoBanco() {
     const token = obterToken();
-
     fetch('/categorias/gestao', {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -809,7 +615,6 @@ function carregarCategoriasDoBanco() {
         .then(response => response.json())
         .then(categorias => {
             console.log("DADOS RECEBIDOS DO BACKEND:", categorias);
-
             if (Array.isArray(categorias) && categorias.length > 0) {
                 atualizarSelectNovaTransacao(categorias);
                 atualizarListaGestaoCategorias(categorias);
@@ -825,42 +630,50 @@ function carregarCategoriasParaSelect() {
     fetch('/categorias', {
         headers: { 'Authorization': `Bearer ${obterToken()}` }
     })
-
-        .then(res => {
-            console.log("Status da resposta:", res.status);
-            return res.json();
-        })
+        .then(res => res.json())
         .then(lista => {
             const listaOrdenada = lista.sort((a, b) => a.nome.localeCompare(b.nome));
-            console.log("Dados que chegaram no JS:", listaOrdenada);
             atualizarSelectNovaTransacao(listaOrdenada, true);
         })
         .catch(erro => console.error("Erro no fetch:", erro));
 }
 
 function carregarCategoriasParaGestao() {
-    fetch('/categorias/gestao', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem("token")}` }
-    })
-        .then(response => {
-            console.log("Status recebido do servidor:", response.status);
-            if (response.status === 401 || response.status === 0) {
-                alert("Sessão expirada!");
-                window.location.href = "index.html";
-                return Promise.reject("Não autorizado");
+    const token = localStorage.getItem("token");
+
+    Promise.all([
+        fetch('/categorias', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+        fetch('/categorias/gestao', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+    ])
+        .then(([todasCategorias, dadosGestao]) => {
+            const mapaQuantidades = {};
+            if (Array.isArray(dadosGestao)) {
+                dadosGestao.forEach(g => {
+                    mapaQuantidades[g.nome.toLowerCase()] = g.quantidadeTransacoes || 0;
+                });
             }
-            if (!response.ok) throw new Error("Erro na requisição");
-            return response.json();
-        })
-        .then(dadosGestao => {
-            atualizarListaGestaoCategorias(dadosGestao);
+
+            const listaFinal = todasCategorias.map(cat => {
+                return {
+                    id: cat.id,
+                    nome: cat.nome,
+                    quantidadeTransacoes: mapaQuantidades[cat.nome.toLowerCase()] || 0
+                };
+            });
+
+            listaFinal.sort((a, b) => a.nome.localeCompare(b.nome));
+            atualizarListaGestaoCategorias(listaFinal);
         })
         .catch(erro => {
-            if (erro !== "Não autorizado") {
-                console.error("Erro:", erro);
-            }
+            console.error("Erro ao sincronizar modais de categoria:", erro);
         });
 }
+
+function atualizarTodaATelaDeCategorias() {
+    carregarCategoriasParaSelect();
+    carregarCategoriasParaGestao();
+}
+
 function verificarResposta(response) {
     if (response.status === 401) {
         console.error("Token expirado ou inválido!");
@@ -891,35 +704,11 @@ function criarNovaCategoriaNoBackend(nomeCategoria) {
         })
         .then(() => {
             exibirMensagemModal("Categoria criada com sucesso!", "sucesso");
-            carregarCategoriasParaSelect();
+            atualizarTodaATelaDeCategorias();
         })
         .catch(erro => {
             console.error(erro);
             exibirMensagemModal("Erro ao criar categoria.", "erro");
-        });
-}
-
-function excluirCategoriaNoBackend(idCategoria, idCategoriaDestino = null) {
-    const token = obterToken();
-    const url = idCategoriaDestino
-        ? `/categorias/${idCategoria}?transferirPara=${idCategoriaDestino}`
-        : `/categorias/${idCategoria}`;
-
-    fetch(url, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => {
-            if (!response.ok) throw new Error("Erro ao excluir categoria.");
-            exibirMensagemModal("Categoria excluída com sucesso!", "sucesso");
-            carregarCategoriasParaSelect();
-        })
-        .catch(erro => {
-            console.error(erro);
-            exibirMensagemModal("Falha ao excluir categoria no banco.", "erro");
         });
 }
 
@@ -933,7 +722,6 @@ function atualizarSelectNovaTransacao(categorias, forcarAtualizacao = false) {
     }
 
     select.innerHTML = '<option value="">Selecione uma categoria</option>';
-
     categorias.forEach(cat => {
         const opt = document.createElement("option");
         opt.value = cat.nome;
@@ -949,18 +737,14 @@ function atualizarSelectNovaTransacao(categorias, forcarAtualizacao = false) {
 
 function atualizarListaGestaoCategorias(categorias) {
     const containerLista = document.getElementById("lista-categorias");
-    console.log("Categorias recebidas na gestão:", categorias);
-    if (!containerLista) {
-        console.error("O elemento com ID 'lista-categorias' não foi encontrado no HTML!");
-        return;
-    }
+    if (!containerLista) return;
 
     containerLista.innerHTML = "";
-
     categorias.forEach(cat => {
-        console.log("Renderizando categoria:", cat.nome);
         const item = document.createElement("div");
-        item.className = "item-categoria-gestao";
+        item.className = "item-categoria";
+        item.id = `cat-linha-${cat.id}`;
+
         item.innerHTML = `
             <span class="nome-categoria">${cat.nome} <span class="badge-transacoes">(${cat.quantidadeTransacoes || 0})</span></span>
             <div class="acoes-categoria">
@@ -976,7 +760,7 @@ function atualizarListaGestaoCategorias(categorias) {
     });
 }
 
-function exibirMensagemModal(mensagem, tipo = "sucesso") {
+function exibirMensagemModal(mensagem, tipo = "sucesso", tempo = 7000) {
     let alerta = document.getElementById("alerta-modal-perfil");
     if (!alerta) {
         alerta = document.createElement("div");
@@ -989,7 +773,7 @@ function exibirMensagemModal(mensagem, tipo = "sucesso") {
             (typeof modalPerfil !== 'undefined' ? modalPerfil : null);
 
         if (containerInterno) {
-            containerInterno.prepend(alerta);
+            containerInterno.append(alerta);
         }
     }
 
@@ -998,47 +782,188 @@ function exibirMensagemModal(mensagem, tipo = "sucesso") {
         alerta.className = `alerta-texto-${tipo}`;
     }
 
-    setTimeout(() => {
-        if (alerta) alerta.remove();
-    }, 3000);
+    setTimeout(() => { if (alerta) alerta.remove(); }, tempo);
 }
 
 window.editarCategoriaAcao = function(idCategoria, nomeAtual) {
-    const novoNome = prompt("Digite o novo nome para a categoria:", nomeAtual);
-    if (!novoNome || novoNome.trim() === "" || novoNome.trim() === nomeAtual) return;
+    const linha = document.getElementById(`cat-linha-${idCategoria}`);
+    if (!linha) return;
+
+    linha.innerHTML = `
+        <input type="text" id="input-edit-cat-${idCategoria}" value="${nomeAtual}" style="flex: 1; margin-right: 10px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
+        <div class="acoes-categoria">
+            <button onclick="salvarEdicaoInline(${idCategoria})" class="editar-categoria" title="Salvar" style="color: #2e7d32;">
+                <span class="material-symbols-outlined">check</span>
+            </button>
+            <button onclick="carregarCategoriasParaGestao()" class="remover-categoria" title="Cancelar" style="color: #c62828;">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    `;
+};
+
+window.salvarEdicaoInline = function(idCategoria) {
+    const input = document.getElementById(`input-edit-cat-${idCategoria}`);
+    if (!input) return;
+
+    const novoNome = input.value.trim();
+    if (!novoNome) return;
 
     const token = obterToken();
     fetch(`/categorias/${idCategoria}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ nome: novoNome.trim() })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ nome: novoNome })
     })
         .then(response => {
-            if (!response.ok) throw new Error("Erro ao editar categoria no servidor.");
-            exibirMensagemModal("Categoria atualizada com sucesso!", "sucesso");
-            carregarCategoriasParaSelect();
+            if (!response.ok) throw new Error("Erro ao editar.");
+            exibirMensagemModal("Categoria updated com sucesso!", "sucesso");
+            atualizarTodaATelaDeCategorias();
         })
-        .catch(erro => {
-            console.error(erro);
-            exibirMensagemModal("Falha ao editar categoria.", "erro");
-        });
+        .catch(erro => console.error(erro));
 };
 
 window.excluirCategoriaAcao = function(idCategoria, nomeCategoria, quantidadeTransacoes) {
+    categoriaIdParaExcluir = idCategoria;
+
+    const modalConfirmar = document.getElementById("modal-confirmar-exclusao");
+    const textoExclusao = document.getElementById("texto-exclusao-categoria");
+
+
+    const areaTransferencia = document.getElementById("area-transferencia-categoria");
+    const selectTransferir = document.getElementById("select-transferir-categoria");
+
+    if (!modalConfirmar || !textoExclusao || !areaTransferencia || !selectTransferir) {
+        console.error("Erro: Elementos do modal de exclusão de categoria não foram encontrados no HTML.");
+        return;
+    }
+
     if (quantidadeTransacoes > 0) {
-        const confirmar = confirm(`A categoria "${nomeCategoria}" possui ${quantidadeTransacoes} transações vinculadas.\nDeseja excluí-la mesmo assim e mover as transações para a categoria Geral?`);
-        if (confirmar) {
-            excluirCategoriaNoBackend(idCategoria, 1);
-        }
+        categoriaPrecisaTransferir = true;
+        textoExclusao.textContent = `A categoria "${nomeCategoria}" possui ${quantidadeTransacoes} transações vinculadas.`;
+        areaTransferencia.style.display = "block";
+
+        const token = obterToken();
+        fetch('/categorias', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(categorias => {
+                selectTransferir.innerHTML = "";
+                const outrasCategorias = categorias.filter(cat => cat.id !== idCategoria);
+
+                outrasCategorias.forEach(cat => {
+                    const option = document.createElement("option");
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    selectTransferir.appendChild(option);
+                });
+            })
+            .catch(erro => console.error("Erro ao popular o select de transferência:", erro));
+
     } else {
-        const confirmar = confirm(`Tem certeza que deseja excluir a categoria "${nomeCategoria}"?`);
-        if (confirmar) {
-            excluirCategoriaNoBackend(idCategoria);
+        categoriaPrecisaTransferir = false;
+        textoExclusao.textContent = `Tem certeza que deseja excluir a categoria "${nomeCategoria}"?`;
+        areaTransferencia.style.display = "none";
+    }
+
+    modalConfirmar.style.display = "flex";
+};
+function excluirCategoriaNoBackend(idCategoria, idCategoriaDestino = null) {
+    const token = obterToken();
+    const destinoFinal = (idCategoriaDestino && idCategoriaDestino !== "") ? idCategoriaDestino : null;
+
+    const url = destinoFinal
+        ? `/categorias/${idCategoria}?transferirPara=${destinoFinal}`
+        : `/categorias/${idCategoria}`;
+
+    console.log("Disparando requisição DELETE para:", url);
+
+    fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(async response => {
+            if (!response.ok) {
+                const textoErro = await response.text();
+                throw new Error(textoErro || `Erro do servidor (Código ${response.status})`);
+            }
+
+            const linhaNaGestao = document.getElementById(`cat-linha-${idCategoria}`);
+            let nomeCategoriaDeletada = "";
+            if (linhaNaGestao) {
+                const spanNome = linhaNaGestao.querySelector(".nome-categoria");
+                if (spanNome) {
+                    nomeCategoriaDeletada = spanNome.textContent.split("(")[0].trim();
+                }
+                linhaNaGestao.remove();
+            }
+
+            const selectCategoria = document.getElementById("categoria");
+            if (selectCategoria && nomeCategoriaDeletada) {
+                const opcaoParaRemover = Array.from(selectCategoria.options).find(
+                    opt => opt.value.trim().toLowerCase() === nomeCategoriaDeletada.toLowerCase()
+                );
+                if (opcaoParaRemover) {
+                    selectCategoria.removeChild(opcaoParaRemover);
+                }
+            }
+
+            exibirMensagemModal("Categoria excluída e transações movidas com sucesso!", "sucesso");
+
+            setTimeout(() => {
+                const modalConfirmarExclusaoContexto = document.getElementById("modal-confirmar-exclusao");
+                if (modalConfirmarExclusaoContexto) {
+                    modalConfirmarExclusaoContexto.style.display = "none";
+                }
+
+                categoriaIdParaExcluir = null;
+                categoriaPrecisaTransferir = false;
+
+                atualizarTodaATelaDeCategorias();
+                carregarTransacoesDoBanco();
+            }, 25);
+        })
+        .catch(erro => {
+            console.error("Erro no processo de exclusão:", erro);
+
+            let mensagemFinal = erro.message;
+            try {
+                const erroJson = JSON.parse(erro.message);
+                if (erroJson.detail) mensagemFinal = erroJson.detail;
+            } catch (e) {}
+
+            exibirMensagemModal(`Falha ao excluir: ${mensagemFinal}`, "erro");
+        });
+}
+
+window.executarExclusaoComTransferencia = function(idCategoria) {
+    const idCat = idCategoria || categoriaIdParaExcluir;
+    console.log("Botão de confirmação acionado para a categoria ID:", idCat);
+
+    if (!idCat) {
+        alert("Erro: Nenhuma categoria identificada para exclusão.");
+        return;
+    }
+
+    let idCategoriaDestino = null;
+    if (categoriaPrecisaTransferir) {
+        const selectTransferir = document.getElementById("select-transferir-categoria");
+        if (selectTransferir) {
+            idCategoriaDestino = selectTransferir.value;
+            console.log("Transferência necessária. ID da categoria destino selecionada:", idCategoriaDestino);
+
+            if (!idCategoriaDestino || idCategoriaDestino === "") {
+                alert("Por favor, selecione uma categoria de destino para transferir as transações.");
+                return;
+            }
         }
     }
+
+    excluirCategoriaNoBackend(idCat, idCategoriaDestino);
 };
 
 function obterToken() {
@@ -1048,7 +973,6 @@ function obterToken() {
 function configurarEdicaoPerfilBackend() {
     const linhaNome = document.getElementById("linha-nome-perfil");
     const linhaEmail = document.getElementById("linha-email-perfil");
-
     if (!linhaNome || !linhaEmail) return;
 
     const displayNome = document.getElementById("display-nome-perfil");
@@ -1058,8 +982,11 @@ function configurarEdicaoPerfilBackend() {
     if (displayEmail) displayEmail.textContent = localStorage.getItem("identificadorLogin") || "";
 
     window.habilitarEdicaoPerfilCompleto = function() {
-        const nomeAtual = displayNome ? displayNome.textContent : "";
-        const emailAtual = displayEmail ? displayEmail.textContent : "";
+        const inputNomeExistente = document.getElementById("input-nome-perfil");
+        const inputEmailExistente = document.getElementById("input-email-perfil");
+
+        const nomeAtual = inputNomeExistente ? inputNomeExistente.value : (document.getElementById("display-nome-perfil")?.textContent || localStorage.getItem("nomeUsuario") || "");
+        const emailAtual = inputEmailExistente ? inputEmailExistente.value : (document.getElementById("display-email-perfil")?.textContent || localStorage.getItem("identificadorLogin") || "");
 
         linhaNome.innerHTML = `
             <div class="container-edicao-perfil" style="width: 100%;">
@@ -1094,7 +1021,6 @@ function configurarEdicaoPerfilBackend() {
                 <span class="material-symbols-outlined">close</span> Cancelar
             </button>
         `;
-
         document.querySelectorAll(".btn-editar-perfil").forEach(btn => btn.style.display = "none");
     };
 
@@ -1114,23 +1040,15 @@ function configurarEdicaoPerfilBackend() {
 
         fetch('/usuarios/perfil', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                nome: novoNome,
-                identificadorLogin: novoEmail
-            })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ nome: novoNome, identificadorLogin: novoEmail })
         })
             .then(response => {
                 if (!response.ok) throw new Error("Erro ao atualizar o perfil.");
                 return response.json();
             })
             .then(dados => {
-                if (dados.token) {
-                    localStorage.setItem("token", dados.token);
-                }
+                if (dados.token) localStorage.setItem("token", dados.token);
                 localStorage.setItem("nomeUsuario", novoNome);
                 localStorage.setItem("identificadorLogin", novoEmail);
 
@@ -1173,6 +1091,8 @@ function configurarEdicaoPerfilBackend() {
         `;
         const areaBotoes = document.getElementById("controles-edicao-perfil");
         if (areaBotoes) areaBotoes.remove();
+
+        document.querySelectorAll(".btn-editar-perfil").forEach(btn => btn.style.display = "flex");
     };
 
     document.querySelectorAll(".btn-editar-perfil").forEach(btn => {
@@ -1181,10 +1101,10 @@ function configurarEdicaoPerfilBackend() {
 }
 
 function limparCamposSenha() {
-    const atual = document.getElementById("senha-atual");
+    const aktual = document.getElementById("senha-atual");
     const nova = document.getElementById("nova-senha");
     const confirmInput = document.getElementById("confirmar-senha");
-    if (atual) atual.value = "";
+    if (aktual) aktual.value = "";
     if (nova) nova.value = "";
     if (confirmInput) confirmInput.value = "";
 }
@@ -1225,12 +1145,10 @@ function configurarEdicaoSenhaBackend() {
                 exibirMensagemModal("Preencha todos os campos!", "erro");
                 return;
             }
-
             if (novaSenha.length < 6) {
                 exibirMensagemModal("Mínimo de 6 caracteres!", "erro");
                 return;
             }
-
             if (novaSenha !== confirmacaoNovaSenha) {
                 exibirMensagemModal("As senhas não coincidem!", "erro");
                 return;
@@ -1242,39 +1160,23 @@ function configurarEdicaoSenhaBackend() {
             try {
                 const response = await fetch('/usuarios/senha', {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        senhaAtual: senhaAtual,
-                        novaSenha: novaSenha,
-                        confirmacaoNovaSenha: novaSenha
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ senhaAtual, novaSenha, confirmacaoNovaSenha: novaSenha })
                 });
 
                 const respostaTexto = await response.text();
-
-                if (!response.ok) {
-                    throw new Error(respostaTexto || "Erro ao alterar senha.");
-                }
+                if (!response.ok) throw new Error(respostaTexto || "Erro ao alterar senha.");
 
                 exibirMensagemModal("Senha alterada com sucesso!", "sucesso");
-
-                setTimeout(() => {
-                    if (btnCancelarSenha) btnCancelarSenha.click();
-                }, 1500);
+                setTimeout(() => { if (btnCancelarSenha) btnCancelarSenha.click(); }, 1500);
 
             } catch (erro) {
                 let mensagemFinal = erro.message;
                 try {
                     const erroJson = JSON.parse(erro.message);
-                    if (erroJson.detail) {
-                        mensagemFinal = erroJson.detail;
-                    }
+                    if (erroJson.detail) mensagemFinal = erroJson.detail;
                 } catch (e) {}
-
-                exibirMensagemModal(mensagemFinal, "erro");
+                exibirMensagemModal(mensagemFinal, "erro", 5000);
             } finally {
                 btnSalvarSenha.disabled = false;
             }
@@ -1282,18 +1184,29 @@ function configurarEdicaoSenhaBackend() {
     }
 }
 
+const btnConfirmarExclusaoModal = document.getElementById("btn-confirmar-exclusao");
+const btnCancelarExclusaoModal = document.getElementById("btn-cancelar-exclusao");
+const modalConfirmarExclusaoContexto = document.getElementById("modal-confirmar-exclusao");
+
+if (btnCancelarExclusaoModal && modalConfirmarExclusaoContexto) {
+    btnCancelarExclusaoModal.onclick = function() {
+        modalConfirmarExclusaoContexto.style.display = "none";
+        categoriaIdParaExcluir = null;
+        categoriaPrecisaTransferir = false;
+    };
+}
+
+if (btnConfirmarExclusaoModal) {
+    btnConfirmarExclusaoModal.onclick = function() {
+        window.executarExclusaoComTransferencia(categoriaIdParaExcluir);
+    };
+}
+
 window.addEventListener("load", function() {
     carregarCategoriasParaSelect();
-    if (typeof carregarTransacoesDoBanco === 'function') {
-        carregarTransacoesDoBanco();
-    }
+    carregarTransacoesDoBanco();
 });
 
 configurarEdicaoPerfilBackend();
 configurarEdicaoSenhaBackend();
-
-if (typeof atualizarResumo === 'function') { atualizarResumo(); }
-if (typeof carregarTransacoesDoBanco === 'function') { carregarTransacoesDoBanco(); }
-carregarCategoriasParaSelect();
-
-console.log("Token enviado:", obterToken());
+atualizarResumo();

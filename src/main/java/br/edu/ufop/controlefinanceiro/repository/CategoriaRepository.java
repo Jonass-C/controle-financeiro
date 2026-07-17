@@ -16,4 +16,6 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Integer> {
 
     List<Categoria> findByUsuarioIdOrderByNomeAsc(Integer usuarioId);
     boolean existsByNomeIgnoreCaseAndUsuarioId(String nome, Integer usuarioId);
+
+    boolean existsByIdAndUsuarioId(Integer id, Integer usuarioId);
 }
