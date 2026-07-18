@@ -47,15 +47,6 @@
                 <label>Categoria</label>
                 <select id="categoria">
                     <option value="">Selecione</option>
-                    <option>Alimentação</option>
-                    <option>Moradia</option>
-                    <option>Transporte</option>
-                    <option>Saúde</option>
-                    <option>Educação</option>
-                    <option>Lazer</option>
-                    <option>Compras</option>
-                    <option>Salário</option>
-                    <option>Investimentos</option>
                     <option value="nova">+ Adicionar nova categoria</option>
                 </select>
                 <input
@@ -107,6 +98,29 @@
     </div>
 </div>
 
+<div id="modal-categorias" class="modal">
+    <div class="modal-content modal-categorias-content">
+        <h2>Gerenciar Categorias</h2>
+        <div class="categoria-topo">
+            <input
+                    type="text"
+                    id="nova-categoria-gerenciar"
+                    placeholder="Nova categoria">
+
+            <button id="adicionar-categoria">
+                Adicionar
+            </button>
+        </div>
+        <div id="lista-categorias">
+        </div>
+        <div class="botoes">
+            <button id="fechar-categorias">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="container">
     <header>
         <div class="titulo-pagina">
@@ -152,9 +166,14 @@
         </div>
     </section>
     <section class="acoes">
-       <div class="wrapper-botoes-acao">
+        <div class="wrapper-botoes-acao">
             <button id="abrir-modal">
+                <span class="material-symbols-outlined">add</span>
                 Nova Transação
+            </button>
+            <button id="abrir-categorias" class="btn-categorias">
+                <span class="material-symbols-outlined">settings</span>
+                Categorias
             </button>
             <div class="card-dash-preview" id="abrir-dashboard" title="Dashboard">
                 <div class="cdp-esquerda">
@@ -174,7 +193,27 @@
         </div>
     </section>
     <section class="lista-transacoes">
-        <h2>Transações</h2>
+        <div class="cabecalho-transacoes">
+            <h2>Transações</h2>
+
+            <div class="wrapper-filtro-dropdown">
+                <span class="material-symbols-outlined">filter_list</span>
+                <select id="filtro-transacoes" onchange="aplicarFiltroTransacoes(this.value)">
+                    <option value="" disabled selected>Filtrar por...</option>
+                    <option value="todas">Todas</option>
+                    <option value="receitas">Receitas</option>
+                    <option value="despesas">Despesas</option>
+                    <option value="recentes">Mais recentes</option>
+                    <option value="antigas">Mais antigas</option>
+                    <option value="data_dec">Data mais atual</option>
+                    <option value="data_asc">Data mais antiga</option>
+                    <option value="maior_valor">Maior valor</option>
+                    <option value="menor_valor">Menor valor</option>
+                    <option value="categoria">Categoria ❯</option>
+                </select>
+            </div>
+        </div>
+
         <table>
             <thead>
             <tr>
@@ -190,6 +229,82 @@
             </tbody>
         </table>
     </section>
+</div>
+
+<div id="modal-confirmar-exclusao" class="modal">
+    <div class="modal-content modal-pequeno">
+        <h3 class="titulo-exclusao">Excluir Categoria</h3>
+        <p id="texto-exclusao-categoria" class="texto-confirmacao"></p>
+        <div id="area-transferencia-categoria" class="area-transferencia" style="display: none;">
+            <label for="select-transferir-categoria">Transferir transações antigas para:</label>
+            <select id="select-transferir-categoria" class="select-transferencia"></select>
+        </div>
+        <div class="botoes-confirmacao">
+            <button id="btn-cancelar-exclusao" class="btn-cancelar">Cancelar</button>
+            <button id="btn-confirmar-exclusao" class="btn-perigo">Confirmar Exclusão</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-confirmar-edicao" class="modal">
+    <div class="modal-content modal-pequeno">
+        <h3 class="titulo-sucesso">Atualizar Transações?</h3>
+        <p id="texto-edicao-categoria" class="texto-confirmacao"></p>
+        <div class="botoes-coluna">
+            <button id="btn-sim-atualizar-edicao" class="btn-sucesso">Sim, atualizar todas transações</button>
+            <button id="btn-nao-atualizar-edicao" class="btn-sucesso-outline">Não, alterar só a categoria</button>
+            <button id="btn-cancelar-edicao" class="btn-texto-perigo">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-perfil" class="modal">
+    <div class="modal-content modal-pequeno">
+        <div class="cabecalho-perfil">
+            <h3>Meu Perfil</h3>
+            <button id="fechar-perfil" class="btn-fechar"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="sessao-perfil">
+            <h4 class="subtitulo-perfil">Dados Pessoais</h4>
+            <div class="linha-dado-perfil" id="linha-nome-perfil">
+                <div class="info-dado">
+                    <span class="label-dado">Nome:</span>
+                    <span class="valor-dado" id="display-nome-perfil">Usuário</span>
+                </div>
+                <button class="btn-editar-perfil" title="Editar Nome">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+            </div>
+            <div class="linha-dado-perfil" id="linha-email-perfil">
+                <div class="info-dado">
+                    <span class="label-dado">Identificador:</span>
+                    <span class="valor-dado" id="display-email-perfil">identificador</span>
+                </div>
+                <button class="btn-editar-perfil" title="Editar Identificador">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+            </div>
+        </div>
+        <hr class="divisor-perfil">
+        <div class="sessao-perfil">
+            <h4 class="subtitulo-perfil">Segurança</h4>
+            <button id="btn-alterar-senha" class="btn-sucesso-outline" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span class="material-symbols-outlined" style="font-size: 20px;">lock</span>
+                Alterar Senha
+            </button>
+
+            <div id="container-senha" class="escondido">
+                <input type="password" id="senha-atual" class="input-perfil" placeholder="Senha Atual">
+                <input type="password" id="nova-senha" class="input-perfil" placeholder="Nova Senha (Mínimo 6 caracteres)">
+                <input type="password" id="confirmar-senha" class="input-perfil" placeholder="Confirmar Nova Senha">
+
+                <div class="botoes-container-senha">
+                    <button id="btn-salvar-senha" class="btn-sucesso">Salvar</button>
+                    <button id="btn-cancelar-senha" class="btn-sucesso">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

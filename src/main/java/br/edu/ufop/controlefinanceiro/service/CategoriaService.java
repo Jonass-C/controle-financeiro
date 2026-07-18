@@ -11,6 +11,8 @@ import br.edu.ufop.controlefinanceiro.repository.TransacaoRepository;
 import br.edu.ufop.controlefinanceiro.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,9 +104,17 @@ public class CategoriaService {
         return converterParaResponse(categoriaSalva);
     }
 
-    public void excluir(Integer categoriaId, Integer usuarioId) {
+    @Transactional
+    public void excluir(Integer categoriaId, Integer transferirPara, Integer usuarioId) {
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(categoriaId, usuarioId)
-                        .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
+                .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
+
+        if (transferirPara != null) {
+            if (!categoriaRepository.existsByIdAndUsuarioId(transferirPara, usuarioId)) {
+                throw new RegraDeNegocioException("Categoria de destino não encontrada.");
+            }
+            transacaoRepository.transferirTransacoesDeCategoria(categoriaId, transferirPara, usuarioId);
+        }
 
         if (transacaoRepository.countByCategoriaIdAndUsuarioId(categoriaId, usuarioId) > 0) {
             throw new RegraDeNegocioException("Não é possível excluir: existem transações vinculadas a esta categoria.");

@@ -32,9 +32,10 @@ form.addEventListener("submit", function (event) {
             mensagem.textContent = "Login realizado com sucesso!";
             mensagem.style.color = "green";
 
+            localStorage.setItem("token", usuarioLogado.token);
             localStorage.setItem("usuarioId", usuarioLogado.id);
-            localStorage.setItem("usuarioIdentificador", usuarioLogado.identificadorLogin);
             localStorage.setItem("nomeUsuario", usuarioLogado.nome);
+            localStorage.setItem("identificadorLogin", usuarioLogado.identificadorLogin);
 
             setTimeout(() => {
                 window.location.href = "gestao.html";
