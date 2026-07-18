@@ -1206,6 +1206,198 @@ window.addEventListener("load", function() {
     carregarCategoriasParaSelect();
     carregarTransacoesDoBanco();
 });
+carregarTransacoesDoBanco = function(ordem = "") {
+    const token = obterToken();
+    if (!token) {
+        console.warn("Nenhum token JWT de autenticação encontrado no localStorage.");
+        return;
+    }
+
+    let ordemBackend = ordem;
+    if (ordem === "todas") {
+        ordemBackend = "";
+    }
+
+    const ehFiltroTipoApenas = (ordem === "receitas" || ordem === "despesas" || ordem === "todas");
+    const url = (ordemBackend && !ehFiltroTipoApenas) ? `/transacoes?ordem=${ordemBackend}` : '/transacoes';
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error("Erro ao buscar transações filtradas.");
+            return response.json();
+        })
+        .then(transacoes => {
+            const tabela = document.getElementById("tabela-transacoes");
+            if (!tabela) return;
+
+            tabela.innerHTML = "";
+
+            transacoes.forEach(t => {
+                let dataObjeto;
+                if (t.data && typeof t.data === 'string') {
+                    if (t.data.includes("-")) {
+                        const [ano, mes, dia] = t.data.split("-");
+                        dataObjeto = new Date(ano, mes - 1, dia);
+                    } else if (t.data.includes("/")) {
+                        const [dia, mes, ano] = t.data.split("/");
+                        dataObjeto = new Date(ano, mes - 1, dia);
+                    } else {
+                        dataObjeto = new Date(t.data);
+                    }
+                } else if (t.data) {
+                    dataObjeto = new Date(t.data);
+                } else {
+                    dataObjeto = new Date();
+                }
+                t._dataCalendario = isNaN(dataObjeto.getTime()) ? new Date(0) : dataObjeto;
+            });
+
+            if (ordem === "data_dec") {
+                transacoes.sort((a, b) => b._dataCalendario - a._dataCalendario);
+            } else if (ordem === "data_asc") {
+                transacoes.sort((a, b) => a._dataCalendario - b._dataCalendario);
+            }
+
+            transacoes.forEach(t => {
+                const linha = tabela.insertRow();
+                for(let i = 0; i < 6; i++) linha.insertCell(i);
+
+                linha.dataset.id = t.id;
+                linha.dataset.descricao = t.descricao;
+
+                linha.cells[0].innerHTML = t.titulo;
+                linha.cells[1].innerHTML = t._dataCalendario.getTime() === 0 ? "Data Inválida" : t._dataCalendario.toLocaleDateString("pt-BR");
+
+                let nomeCategoriaExibir = "Geral";
+                if (t.categoria) {
+                    nomeCategoriaExibir = typeof t.categoria === 'object' ? t.categoria.nome : t.categoria;
+                } else if (t.categoriaNome) {
+                    nomeCategoriaExibir = t.categoriaNome;
+                }
+
+                linha.cells[2].innerHTML = nomeCategoriaExibir;
+                linha.cells[3].innerHTML = t.tipo === "RECEITA" ? "Receita" : "Despesa";
+                linha.cells[4].innerHTML = "R$ " + t.valor.toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                linha.cells[5].innerHTML = `
+                    <button class="btn-acao visualizar" title="Visualizar descrição"><span class="material-symbols-outlined">visibility</span></button>
+                    <button class="btn-acao editar" title="Editar transação"><span class="material-symbols-outlined">edit</span></button>
+                    <button class="btn-acao excluir" title="Excluir transação"><span class="material-symbols-outlined">delete</span></button>
+                `;
+                configurarEventosLinha(linha);
+
+                if (ordem === "receitas" && t.tipo !== "RECEITA") {
+                    linha.style.display = "none";
+                } else if (ordem === "despesas" && t.tipo !== "DESPESA") {
+                    linha.style.display = "none";
+                }
+            });
+
+            atualizarResumo();
+        })
+        .catch(erro => console.error("Erro ao listar dados ordenados:", erro));
+};
+
+const opcoesFiltroOriginais = `
+    <option value="" disabled selected>Filtrar por...</option>
+    <option value="todas">Todas</option>
+    <option value="receitas">Receitas</option>
+    <option value="despesas">Despesas</option>
+    <option value="recentes">Mais recentes</option>
+    <option value="antigas">Mais antigas</option>
+    <option value="data_dec">Data mais atual</option>
+    <option value="data_dac">Data mais antiga</option>
+    <option value="maior_valor">Maior valor</option>
+    <option value="menor_valor">Menor valor</option>
+    <option value="categoria">Categoria ❯</option>
+`;
+window.aplicarFiltroTransacoes = function(valorFiltro) {
+    const selectFiltro = document.getElementById("filtro-transacoes");
+    if (!selectFiltro) return;
+
+    if (valorFiltro === "voltar_filtros") {
+        selectFiltro.innerHTML = opcoesFiltroOriginais;
+        carregarTransacoesDoBanco();
+        return;
+    }
+
+    if (valorFiltro.startsWith("cat_")) {
+        const nomeDaCategoria = valorFiltro.replace("cat_", "");
+        filtrarTabelaLocalPorCategoriaEspecifica(nomeDaCategoria);
+        return;
+    }
+
+    if (valorFiltro === "categoria") {
+        const token = obterToken();
+
+        fetch('/categorias', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(lista => {
+                lista.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                selectFiltro.blur();
+
+                while (selectFiltro.options.length > 0) {
+                    selectFiltro.remove(0);
+                }
+
+                const optVoltar = document.createElement("option");
+                optVoltar.value = "voltar_filtros";
+                optVoltar.textContent = "↩ Voltar aos Filtros";
+                selectFiltro.appendChild(optVoltar);
+
+                const optTitulo = document.createElement("option");
+                optTitulo.value = "";
+                optTitulo.disabled = true;
+                optTitulo.selected = true;
+                optTitulo.textContent = "Escolha uma Categoria";
+                selectFiltro.appendChild(optTitulo);
+
+                lista.forEach(cat => {
+                    const option = document.createElement("option");
+                    option.value = `cat_${cat.nome}`;
+                    option.textContent = cat.nome;
+                    selectFiltro.appendChild(option);
+                });
+
+                setTimeout(() => {
+                    selectFiltro.focus();
+                    const eventoClique = new MouseEvent('mousedown', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    selectFiltro.dispatchEvent(eventoClique);
+                }, 50);
+            })
+            .catch(erro => console.error("Erro ao buscar sub-categorias para o select:", erro));
+    } else {
+        carregarTransacoesDoBanco(valorFiltro);
+    }
+};
+
+function filtrarTabelaLocalPorCategoriaEspecifica(nomeCategoria) {
+    const tabela = document.getElementById("tabela-transacoes");
+    if (!tabela) return;
+
+    for (let i = 0; i < tabela.rows.length; i++) {
+        const celulaCategoria = tabela.rows[i].cells[2].textContent.trim();
+
+        if (celulaCategoria.toLowerCase() === nomeCategoria.toLowerCase()) {
+            tabela.rows[i].style.display = "";
+        } else {
+            tabela.rows[i].style.display = "none";
+        }
+    }
+}
+
 
 configurarEdicaoPerfilBackend();
 configurarEdicaoSenhaBackend();

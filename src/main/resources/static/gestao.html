@@ -193,7 +193,27 @@
         </div>
     </section>
     <section class="lista-transacoes">
-        <h2>Transações</h2>
+        <div class="cabecalho-transacoes">
+            <h2>Transações</h2>
+
+            <div class="wrapper-filtro-dropdown">
+                <span class="material-symbols-outlined">filter_list</span>
+                <select id="filtro-transacoes" onchange="aplicarFiltroTransacoes(this.value)">
+                    <option value="" disabled selected>Filtrar por...</option>
+                    <option value="todas">Todas</option>
+                    <option value="receitas">Receitas</option>
+                    <option value="despesas">Despesas</option>
+                    <option value="recentes">Mais recentes</option>
+                    <option value="antigas">Mais antigas</option>
+                    <option value="data_dec">Data mais atual</option>
+                    <option value="data_asc">Data mais antiga</option>
+                    <option value="maior_valor">Maior valor</option>
+                    <option value="menor_valor">Menor valor</option>
+                    <option value="categoria">Categoria ❯</option>
+                </select>
+            </div>
+        </div>
+
         <table>
             <thead>
             <tr>
