@@ -80,6 +80,9 @@ abrir.addEventListener("click", abrirModal);
 cancelar.addEventListener("click", fecharModal);
 
 abrirDashboard.addEventListener("click", function(){
+    if(typeof atualizarDashboard === 'function') {
+        atualizarDashboard();
+    }
     modalDashboard.style.display = "flex";
 });
 
@@ -492,6 +495,10 @@ function atualizarResumo(){
     document.getElementById("ganhos").innerHTML = recipes.toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
     document.getElementById("gastos").innerHTML = despesas.toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
     document.getElementById("saldo").innerHTML = saldo.toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+
+    if(typeof atualizarDashboard === 'function') {
+        atualizarDashboard();
+    }
 }
 
 const campos = document.querySelectorAll("input, select, textarea");
@@ -1233,6 +1240,268 @@ window.addEventListener("load", function() {
     carregarTransacoesDoBanco();
 });
 
+let chartLinha = null;
+let chartPizza = null;
+let chartBarra = null;
+let periodoDashAtual = "todos";
+
+document.querySelectorAll(".btn-filtro").forEach(btn => {
+    btn.addEventListener("click", function() {
+        document.querySelectorAll(".btn-filtro").forEach(b => b.classList.remove("ativo"));
+        this.classList.add("ativo");
+        periodoDashAtual = this.dataset.periodo;
+        atualizarDashboard();
+    });
+});
+
+function extrairDataParaObj(dataStr) {
+    if(dataStr.includes("/")) {
+        const partes = dataStr.split("/");
+        return new Date(partes[2], partes[1] - 1, partes[0], 0,0,0);
+    }
+    return new Date(dataStr);
+}
+
+function parseValorReal(str) {
+    return parseFloat(str.replace("R$ ", "").replace(/\./g, "").replace(",", "."));
+}
+
+function atualizarDashboard() {
+    const tabela = document.getElementById("tabela-transacoes");
+    const todasTransacoes = [];
+
+    for(let i = 0; i < tabela.rows.length; i++) {
+        const linha = tabela.rows[i];
+        todasTransacoes.push({
+            dataStr: linha.cells[1].innerHTML,
+            dataObj: extrairDataParaObj(linha.cells[1].innerHTML),
+            categoria: linha.cells[2].textContent.trim(),
+            tipo: linha.cells[3].innerHTML.trim(),
+            valor: parseValorReal(linha.cells[4].innerHTML)
+        });
+    }
+
+    const hoje = new Date();
+    hoje.setHours(23, 59, 59, 999);
+
+    let transacoesFiltradas = todasTransacoes.filter(t => {
+        if(periodoDashAtual === "todos") return true;
+
+        if(periodoDashAtual === "ano") {
+            return t.dataObj.getFullYear() === hoje.getFullYear();
+        }
+
+        if(periodoDashAtual === "mes") {
+            return t.dataObj.getMonth() === hoje.getMonth() && t.dataObj.getFullYear() === hoje.getFullYear();
+        }
+
+        if(periodoDashAtual === "hoje") {
+            return t.dataObj.getDate() === hoje.getDate() &&
+                t.dataObj.getMonth() === hoje.getMonth() &&
+                t.dataObj.getFullYear() === hoje.getFullYear();
+        }
+
+        const diferencaTempo = Math.abs(hoje - t.dataObj);
+        const diferencaDias = Math.ceil(diferencaTempo / (1000 * 60 * 60 * 24));
+
+        if(periodoDashAtual === "30d") return diferencaDias <= 30 && t.dataObj <= hoje;
+        if(periodoDashAtual === "7d") return diferencaDias <= 7 && t.dataObj <= hoje;
+    });
+    transacoesFiltradas.sort((a, b) => a.dataObj - b.dataObj);
+
+    let tReceitas = 0;
+    let tDespesas = 0;
+    const categDespesas = {};
+    const evolucaoDiaria = {};
+    let saldoAcumulado = 0;
+
+    transacoesFiltradas.forEach(t => {
+        if(t.tipo === "Receita") {
+            tReceitas += t.valor;
+            saldoAcumulado += t.valor;
+        } else {
+            tDespesas += t.valor;
+            saldoAcumulado -= t.valor;
+            categDespesas[t.categoria] = (categDespesas[t.categoria] || 0) + t.valor;
+        }
+        evolucaoDiaria[t.dataStr] = saldoAcumulado;
+    });
+
+    document.getElementById("dash-saldo").innerText = (tReceitas - tDespesas).toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+    document.getElementById("dash-receitas").innerText = tReceitas.toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+    document.getElementById("dash-despesas").innerText = tDespesas.toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+    document.getElementById("dash-qtd").innerText = transacoesFiltradas.length;
+
+    const estilos = getComputedStyle(document.body);
+    const corTextos = estilos.getPropertyValue('--grafico-texto').trim();
+    const corGrid = estilos.getPropertyValue('--grafico-grid').trim();
+    const corReceita = estilos.getPropertyValue('--grafico-receita').trim();
+    const corReceitaBg = estilos.getPropertyValue('--grafico-receita-bg').trim();
+    const corDespesa = estilos.getPropertyValue('--grafico-despesa').trim();
+    const fonteGrafico = estilos.getPropertyValue('--grafico-fonte').trim();
+
+    Chart.defaults.color = corTextos;
+    Chart.defaults.font.family = fonteGrafico;
+
+    if(chartLinha) chartLinha.destroy();
+    chartLinha = new Chart(document.getElementById('chart-linha').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: Object.keys(evolucaoDiaria),
+            datasets: [{
+                label: 'Saldo Acumulado (Período)',
+                data: Object.values(evolucaoDiaria),
+                borderColor: corReceita,
+                backgroundColor: corReceitaBg,
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: corReceita,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { grid: { color: corGrid } },
+                y: { grid: { color: corGrid } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    const lblPizza = Object.keys(categDespesas);
+    const valPizza = Object.values(categDespesas);
+
+    if(chartPizza) chartPizza.destroy();
+
+    if(valPizza.length === 0) {
+        document.getElementById('chart-pizza').style.display = 'none';
+        document.getElementById('chart-pizza-vazio').style.display = 'block';
+    } else {
+        document.getElementById('chart-pizza').style.display = 'block';
+        document.getElementById('chart-pizza-vazio').style.display = 'none';
+
+        const coresPizza = [
+            estilos.getPropertyValue('--grafico-p1').trim(),
+            estilos.getPropertyValue('--grafico-p2').trim(),
+            estilos.getPropertyValue('--grafico-p3').trim(),
+            estilos.getPropertyValue('--grafico-p4').trim(),
+            estilos.getPropertyValue('--grafico-p5').trim(),
+            estilos.getPropertyValue('--grafico-p6').trim(),
+            estilos.getPropertyValue('--grafico-p7').trim(),
+            estilos.getPropertyValue('--grafico-p8').trim()
+        ];
+
+        chartPizza = new Chart(document.getElementById('chart-pizza').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: lblPizza,
+                datasets: [{
+                    data: valPizza,
+                    backgroundColor: coresPizza,
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: corTextos, boxWidth: 12, padding: 15 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                const tot = valPizza.reduce((a,b)=>a+b,0);
+                                const v = ctx.parsed;
+                                const pct = ((v/tot)*100).toFixed(1);
+                                return ` ${ctx.label}: ${v.toLocaleString("pt-BR", {style: "currency", currency: "BRL"})} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const mesesAbrev = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const dadosMensais = {};
+
+    transacoesFiltradas.forEach(t => {
+        const mes = t.dataObj.getMonth();
+        const ano = t.dataObj.getFullYear().toString().substr(-2);
+        const chaveLabel = `${mesesAbrev[mes]}/${ano}`;
+        const chaveOrdenacao = t.dataObj.getFullYear() * 100 + mes;
+
+        if (!dadosMensais[chaveOrdenacao]) {
+            dadosMensais[chaveOrdenacao] = { label: chaveLabel, receitas: 0, despesas: 0 };
+        }
+
+        if (t.tipo === "Receita") {
+            dadosMensais[chaveOrdenacao].receitas += t.valor;
+        } else {
+            dadosMensais[chaveOrdenacao].despesas += t.valor;
+        }
+    });
+
+    const chavesOrdenadas = Object.keys(dadosMensais).sort((a, b) => a - b);
+    const labelsBarra = [];
+    const dadosReceitasBarra = [];
+    const dadosDespesasBarra = [];
+
+    chavesOrdenadas.forEach(chave => {
+        labelsBarra.push(dadosMensais[chave].label);
+        dadosReceitasBarra.push(dadosMensais[chave].receitas);
+        dadosDespesasBarra.push(dadosMensais[chave].despesas);
+    });
+
+    if(chartBarra) chartBarra.destroy();
+
+    chartBarra = new Chart(document.getElementById('chart-barra').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: labelsBarra,
+            datasets: [
+                {
+                    label: 'Receitas',
+                    data: dadosReceitasBarra,
+                    backgroundColor: corReceita,
+                    borderRadius: 4
+                },
+                {
+                    label: 'Despesas',
+                    data: dadosDespesasBarra,
+                    backgroundColor: corDespesa,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: corGrid } }
+            },
+            plugins: {
+                legend: { position: 'top', labels: { color: corTextos, usePointStyle: true } },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR", {style: "currency", currency: "BRL"})}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
 const opcoesFiltroOriginais = `
     <option value="" disabled selected>Filtrar por...</option>
     <option value="todas">Todas</option>
@@ -1326,9 +1595,9 @@ function filtrarTabelaLocalPorCategoriaEspecifica(nomeCategoria) {
             tabela.rows[i].style.display = "none";
         }
     }
+    atualizarResumo();
 }
 
 
 configurarEdicaoPerfilBackend();
 configurarEdicaoSenhaBackend();
-atualizarResumo();

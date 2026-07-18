@@ -4,6 +4,7 @@
 <head>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aurum | Gestão</title>
@@ -94,7 +95,59 @@
 
 <div id="modal-dashboard" class="modal">
     <div class="modal-dashboard-content">
-        <h2>Dashboard Financeiro</h2>
+        <div class="cabecalho-dash">
+            <h2>Dashboard Financeiro</h2>
+            <div class="dash-filtros">
+                <button class="btn-filtro ativo" data-periodo="todos">Todo período</button>
+                <button class="btn-filtro" data-periodo="ano">Este ano</button>
+                <button class="btn-filtro" data-periodo="mes">Este mês</button>
+                <button class="btn-filtro" data-periodo="30d">Últimos 30 dias</button>
+                <button class="btn-filtro" data-periodo="7d">Últimos 7 dias</button>
+                <button class="btn-filtro" data-periodo="hoje">Hoje</button>
+            </div>
+        </div>
+        <div class="dash-cards">
+            <div class="dash-card">
+                <span>Saldo Atual</span>
+                <h3 id="dash-saldo">R$ 0,00</h3>
+            </div>
+            <div class="dash-card">
+                <span>Total Receitas</span>
+                <h3 id="dash-receitas">R$ 0,00</h3>
+            </div>
+            <div class="dash-card">
+                <span>Total Despesas</span>
+                <h3 id="dash-despesas">R$ 0,00</h3>
+            </div>
+            <div class="dash-card">
+                <span>Transações</span>
+                <h3 id="dash-qtd">0</h3>
+            </div>
+        </div>
+        <div class="dash-charts">
+            <div class="dash-chart-container linha-chart">
+                <h4>Evolução do Saldo</h4>
+                <div class="chart-wrapper">
+                    <canvas id="chart-linha"></canvas>
+                </div>
+            </div>
+
+            <div class="dash-chart-container grid-2-col">
+                <div class="chart-box">
+                    <h4>Despesas por Categoria</h4>
+                    <div id="chart-pizza-vazio">Nenhuma despesa no período selecionado.</div>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-pizza"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h4>Receitas vs Despesas</h4>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-barra"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
