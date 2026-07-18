@@ -1,17 +1,19 @@
 package br.edu.ufop.controlefinanceiro.controller;
 
-import br.edu.ufop.controlefinanceiro.controller.dto.CadastroRequest;
-import br.edu.ufop.controlefinanceiro.controller.dto.LoginRequest;
-import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioResponse;
+import br.edu.ufop.controlefinanceiro.controller.dto.*;
+import br.edu.ufop.controlefinanceiro.domain.Usuario;
+import br.edu.ufop.controlefinanceiro.security.TokenDenyListService;
+import br.edu.ufop.controlefinanceiro.security.TokenService;
 import br.edu.ufop.controlefinanceiro.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final TokenService tokenService;
+    private final TokenDenyListService tokenDenyListService;
 
     @PostMapping("/cadastro")
     public ResponseEntity<UsuarioResponse> cadastrar(@Valid @RequestBody CadastroRequest request) {
@@ -30,5 +34,28 @@ public class UsuarioController {
     public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody LoginRequest request) {
         UsuarioResponse response = usuarioService.autenticar(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/perfil")
+    public ResponseEntity<UsuarioResponse> editarPerfil(@Valid @RequestBody EditarPerfilRequest request, @AuthenticationPrincipal Usuario usuarioLogado) {
+    UsuarioResponse response = usuarioService.editarPerfil(request, usuarioLogado.getId());
+    return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/senha")
+    public ResponseEntity<UsuarioResponse> alterarSenha(@Valid @RequestBody AlterarSenhaRequest request, @AuthenticationPrincipal Usuario usuarioLogado) {
+        usuarioService.alterarSenha(request, usuarioLogado.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")){
+            String token = authHeader.substring(7);
+            Instant expiracao = tokenService.extrairDataExpiracao(token);
+            tokenDenyListService.revogarToken(token, expiracao);
+        }
+        return ResponseEntity.noContent().build();
     }
 }

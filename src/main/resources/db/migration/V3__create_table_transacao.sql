@@ -7,6 +7,7 @@ CREATE TABLE transacao (
     descricao VARCHAR(255) DEFAULT NULL,
     categoria_id INTEGER NOT NULL,
     usuario_id INTEGER NOT NULL,
+    criado_em TIMESTAMP NOT NULL,
     FOREIGN KEY (categoria_id) REFERENCES categoria(id),
     FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );

@@ -27,8 +27,8 @@ public class TransacaoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TransacaoResponse>> listar(@AuthenticationPrincipal Usuario usuarioLogado){
-        List<TransacaoResponse> response = transacaoService.listar(usuarioLogado.getId());
+    public ResponseEntity<List<TransacaoResponse>> listar(@AuthenticationPrincipal Usuario usuarioLogado, @RequestParam(required = false, defaultValue = "recentes") String ordem){
+        List<TransacaoResponse> response = transacaoService.listar(usuarioLogado.getId(), ordem);
         return ResponseEntity.ok(response);
     }
 

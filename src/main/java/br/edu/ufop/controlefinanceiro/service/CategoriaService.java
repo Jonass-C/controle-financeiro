@@ -23,16 +23,32 @@ public class CategoriaService {
     private final UsuarioRepository usuarioRepository;
     private final TransacaoRepository transacaoRepository;
 
+    public void gerarCategoriasPadrao(Usuario usuario) {
+        List<String> nomesPadrao = List.of(
+                "Alimentação", "Compras", "Educação", "Investimentos",
+                "Lazer", "Moradia", "Salário", "Saúde", "Transporte"
+        );
+
+        List<Categoria> categoriasPadrao = nomesPadrao.stream()
+                .map(nome -> Categoria.builder()
+                        .nome(nome)
+                        .usuario(usuario)
+                        .build())
+                .toList();
+
+        categoriaRepository.saveAll(categoriasPadrao);
+    }
+
     public CategoriaResponse criar(CategoriaRequest request, Integer usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado"));
 
-        if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome(), usuarioId)) {
+        if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome().trim(), usuarioId)) {
             throw new RegraDeNegocioException("Categoria já existente.");
         }
 
         Categoria categoria = Categoria.builder()
-                .nome(request.getNome())
+                .nome(request.getNome().trim())
                 .usuario(usuario)
                 .build();
 
@@ -45,7 +61,7 @@ public class CategoriaService {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        List<Categoria> categorias = categoriaRepository.buscarGlobaisEPersonalizadas(usuarioId);
+        List<Categoria> categorias = categoriaRepository.findByUsuarioIdOrderByNomeAsc(usuarioId);
         List<CategoriaResponse> listaResponse = new ArrayList<>();
 
         for (Categoria categoria: categorias) {
@@ -60,7 +76,7 @@ public class CategoriaService {
             throw new RegraDeNegocioException("Usuário não encontrado.");
         }
 
-        List<Categoria> categorias = categoriaRepository.buscarPersonalizadasDoUsuario(usuarioId);
+        List<Categoria> categorias = categoriaRepository.findByUsuarioIdOrderByNomeAsc(usuarioId);
         List<CategoriaResponseGestao> listaResponse = new ArrayList<>();
 
         for (Categoria categoria: categorias) {
@@ -74,17 +90,13 @@ public class CategoriaService {
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(categoriaId, usuarioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
-        if (categoria.getUsuario() == null) {
-            throw new RegraDeNegocioException("Categorias padrão não podem ser editadas.");
-        }
-
         if (!categoria.getNome().equalsIgnoreCase(request.getNome())) {
-            if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome(), usuarioId)) {
+            if (categoriaRepository.existsByNomeIgnoreCaseAndUsuarioId(request.getNome().trim(), usuarioId)) {
                 throw new RegraDeNegocioException("Você já possui uma categoria com este nome.");
             }
         }
 
-        categoria.setNome(request.getNome());
+        categoria.setNome(request.getNome().trim());
 
         Categoria categoriaSalva = categoriaRepository.save(categoria);
         return converterParaResponse(categoriaSalva);
@@ -94,10 +106,6 @@ public class CategoriaService {
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(categoriaId, usuarioId)
                         .orElseThrow(() -> new RegraDeNegocioException("Categoria não encontrada."));
 
-        if (categoria.getUsuario() == null) {
-            throw new RegraDeNegocioException("Categorias padrão não podem ser excluídas.");
-        }
-
         if (transacaoRepository.countByCategoriaIdAndUsuarioId(categoriaId, usuarioId) > 0) {
             throw new RegraDeNegocioException("Não é possível excluir: existem transações vinculadas a esta categoria.");
         }
@@ -106,11 +114,10 @@ public class CategoriaService {
     }
 
     private CategoriaResponse converterParaResponse(Categoria categoria) {
-        Integer usuarioId = (categoria.getUsuario() != null) ? categoria.getUsuario().getId() : null;
         return new CategoriaResponse(
                 categoria.getId(),
                 categoria.getNome(),
-                usuarioId
+                categoria.getUsuario().getId()
         );
     }
 
