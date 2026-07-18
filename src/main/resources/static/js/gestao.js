@@ -37,6 +37,14 @@ const btnSalvarSenha = document.getElementById("btn-salvar-senha");
 const displayNome = document.getElementById("display-nome-perfil");
 const chaveNomePerfil = `perfil_nome_${idUsuario}`;
 
+
+const tokenValidadorInicial = localStorage.getItem("token");
+if (!tokenValidadorInicial) {
+    alert("Sua sessão expirou ou você não está logado. Por favor, faça login novamente.");
+    window.location.href = "index.html";
+    throw new Error("Acesso interrompido: Sem token de autenticação.");
+}
+
 if(nomeUsuario){
     const primeiroNome = nomeUsuario.split(" ")[0];
     const divSaudacao = document.getElementById("usuario-nome");
@@ -417,6 +425,13 @@ form.addEventListener("submit", function(e){
             atualizarResumo();
             atualizarTodaATelaDeCategorias();
             fecharModal();
+
+            const selectFiltro = document.getElementById("filtro-transacoes");
+            const filtroAtual = selectFiltro ? selectFiltro.value : "";
+
+            if (filtroAtual && filtroAtual !== "todas") {
+                carregarTransacoesDoBanco(filtroAtual);
+            }
         })
         .catch(erro => {
             console.error(erro);
@@ -535,14 +550,22 @@ window.addEventListener('scroll', function() {
     if (fp && fp.isOpen) { fp.close(); }
 }, true);
 
-function carregarTransacoesDoBanco() {
+function carregarTransacoesDoBanco(ordem = "") {
     const token = obterToken();
     if (!token) {
         console.warn("Nenhum token JWT de autenticação encontrado no localStorage.");
         return;
     }
 
-    fetch('/transacoes', {
+    let ordemBackend = ordem;
+    if (ordem === "todas") {
+        ordemBackend = "";
+    }
+
+    const ehFiltroTipoApenas = (ordem === "receitas" || ordem === "despesas" || ordem === "todas");
+    const url = (ordemBackend && !ehFiltroTipoApenas) ? `/transacoes?ordem=${ordemBackend}` : '/transacoes';
+
+    fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -550,21 +573,16 @@ function carregarTransacoesDoBanco() {
         }
     })
         .then(response => {
-            if (!response.ok) throw new Error("Erro ao buscar transações antigas.");
+            if (!response.ok) throw new Error("Erro ao buscar transações filtradas.");
             return response.json();
         })
         .then(transacoes => {
             const tabela = document.getElementById("tabela-transacoes");
+            if (!tabela) return;
+
             tabela.innerHTML = "";
-            transacoes.sort((a, b) => b.id - a.id);
 
             transacoes.forEach(t => {
-                const linha = tabela.insertRow();
-                for(let i=0;i<6;i++) linha.insertCell(i);
-
-                linha.dataset.id = t.id;
-                linha.dataset.descricao = t.descricao;
-
                 let dataObjeto;
                 if (t.data && typeof t.data === 'string') {
                     if (t.data.includes("-")) {
@@ -581,8 +599,24 @@ function carregarTransacoesDoBanco() {
                 } else {
                     dataObjeto = new Date();
                 }
+                t._dataCalendario = isNaN(dataObjeto.getTime()) ? new Date(0) : dataObjeto;
+            });
+
+            if (ordem === "data_dec") {
+                transacoes.sort((a, b) => b._dataCalendario - a._dataCalendario);
+            } else if (ordem === "data_asc") {
+                transacoes.sort((a, b) => a._dataCalendario - b._dataCalendario);
+            }
+
+            transacoes.forEach(t => {
+                const linha = tabela.insertRow();
+                for(let i = 0; i < 6; i++) linha.insertCell(i);
+
+                linha.dataset.id = t.id;
+                linha.dataset.descricao = t.descricao;
+
                 linha.cells[0].innerHTML = t.titulo;
-                linha.cells[1].innerHTML = isNaN(dataObjeto.getTime()) ? "Data Inválida" : dataObjeto.toLocaleDateString("pt-BR");
+                linha.cells[1].innerHTML = t._dataCalendario.getTime() === 0 ? "Data Inválida" : t._dataCalendario.toLocaleDateString("pt-BR");
 
                 let nomeCategoriaExibir = "Geral";
                 if (t.categoria) {
@@ -595,34 +629,22 @@ function carregarTransacoesDoBanco() {
                 linha.cells[3].innerHTML = t.tipo === "RECEITA" ? "Receita" : "Despesa";
                 linha.cells[4].innerHTML = "R$ " + t.valor.toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 linha.cells[5].innerHTML = `
-                <button class="btn-acao visualizar" title="Visualizar descrição"><span class="material-symbols-outlined">visibility</span></button>
-                <button class="btn-acao editar" title="Editar transação"><span class="material-symbols-outlined">edit</span></button>
-                <button class="btn-acao excluir" title="Excluir transação"><span class="material-symbols-outlined">delete</span></button>
-            `;
+                    <button class="btn-acao visualizar" title="Visualizar descrição"><span class="material-symbols-outlined">visibility</span></button>
+                    <button class="btn-acao editar" title="Editar transação"><span class="material-symbols-outlined">edit</span></button>
+                    <button class="btn-acao excluir" title="Excluir transação"><span class="material-symbols-outlined">delete</span></button>
+                `;
                 configurarEventosLinha(linha);
+
+                if (ordem === "receitas" && t.tipo !== "RECEITA") {
+                    linha.style.display = "none";
+                } else if (ordem === "despesas" && t.tipo !== "DESPESA") {
+                    linha.style.display = "none";
+                }
             });
+
             atualizarResumo();
         })
-        .catch(erro => console.error("Erro ao listar dados iniciais:", erro));
-}
-
-function carregarCategoriasDoBanco() {
-    const token = obterToken();
-    fetch('/categorias/gestao', {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` }
-    })
-        .then(response => response.json())
-        .then(categorias => {
-            console.log("DADOS RECEBIDOS DO BACKEND:", categorias);
-            if (Array.isArray(categorias) && categorias.length > 0) {
-                atualizarSelectNovaTransacao(categorias);
-                atualizarListaGestaoCategorias(categorias);
-            } else {
-                console.warn("A lista de categorias está vazia ou não é um array!");
-            }
-        })
-        .catch(erro => console.error("Erro ao carregar categorias:", erro));
+        .catch(erro => console.error("Erro ao listar dados ordenados:", erro));
 }
 
 function carregarCategoriasParaSelect() {
@@ -819,6 +841,10 @@ window.salvarEdicaoInline = function(idCategoria) {
             if (!response.ok) throw new Error("Erro ao editar.");
             exibirMensagemModal("Categoria updated com sucesso!", "sucesso");
             atualizarTodaATelaDeCategorias();
+
+            const selectFiltro = document.getElementById("filtro-transacoes");
+            const filtroAtual = selectFiltro ? selectFiltro.value : "";
+            carregarTransacoesDoBanco(filtroAtual);
         })
         .catch(erro => console.error(erro));
 };
@@ -1206,102 +1232,6 @@ window.addEventListener("load", function() {
     carregarCategoriasParaSelect();
     carregarTransacoesDoBanco();
 });
-carregarTransacoesDoBanco = function(ordem = "") {
-    const token = obterToken();
-    if (!token) {
-        console.warn("Nenhum token JWT de autenticação encontrado no localStorage.");
-        return;
-    }
-
-    let ordemBackend = ordem;
-    if (ordem === "todas") {
-        ordemBackend = "";
-    }
-
-    const ehFiltroTipoApenas = (ordem === "receitas" || ordem === "despesas" || ordem === "todas");
-    const url = (ordemBackend && !ehFiltroTipoApenas) ? `/transacoes?ordem=${ordemBackend}` : '/transacoes';
-
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    })
-        .then(response => {
-            if (!response.ok) throw new Error("Erro ao buscar transações filtradas.");
-            return response.json();
-        })
-        .then(transacoes => {
-            const tabela = document.getElementById("tabela-transacoes");
-            if (!tabela) return;
-
-            tabela.innerHTML = "";
-
-            transacoes.forEach(t => {
-                let dataObjeto;
-                if (t.data && typeof t.data === 'string') {
-                    if (t.data.includes("-")) {
-                        const [ano, mes, dia] = t.data.split("-");
-                        dataObjeto = new Date(ano, mes - 1, dia);
-                    } else if (t.data.includes("/")) {
-                        const [dia, mes, ano] = t.data.split("/");
-                        dataObjeto = new Date(ano, mes - 1, dia);
-                    } else {
-                        dataObjeto = new Date(t.data);
-                    }
-                } else if (t.data) {
-                    dataObjeto = new Date(t.data);
-                } else {
-                    dataObjeto = new Date();
-                }
-                t._dataCalendario = isNaN(dataObjeto.getTime()) ? new Date(0) : dataObjeto;
-            });
-
-            if (ordem === "data_dec") {
-                transacoes.sort((a, b) => b._dataCalendario - a._dataCalendario);
-            } else if (ordem === "data_asc") {
-                transacoes.sort((a, b) => a._dataCalendario - b._dataCalendario);
-            }
-
-            transacoes.forEach(t => {
-                const linha = tabela.insertRow();
-                for(let i = 0; i < 6; i++) linha.insertCell(i);
-
-                linha.dataset.id = t.id;
-                linha.dataset.descricao = t.descricao;
-
-                linha.cells[0].innerHTML = t.titulo;
-                linha.cells[1].innerHTML = t._dataCalendario.getTime() === 0 ? "Data Inválida" : t._dataCalendario.toLocaleDateString("pt-BR");
-
-                let nomeCategoriaExibir = "Geral";
-                if (t.categoria) {
-                    nomeCategoriaExibir = typeof t.categoria === 'object' ? t.categoria.nome : t.categoria;
-                } else if (t.categoriaNome) {
-                    nomeCategoriaExibir = t.categoriaNome;
-                }
-
-                linha.cells[2].innerHTML = nomeCategoriaExibir;
-                linha.cells[3].innerHTML = t.tipo === "RECEITA" ? "Receita" : "Despesa";
-                linha.cells[4].innerHTML = "R$ " + t.valor.toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                linha.cells[5].innerHTML = `
-                    <button class="btn-acao visualizar" title="Visualizar descrição"><span class="material-symbols-outlined">visibility</span></button>
-                    <button class="btn-acao editar" title="Editar transação"><span class="material-symbols-outlined">edit</span></button>
-                    <button class="btn-acao excluir" title="Excluir transação"><span class="material-symbols-outlined">delete</span></button>
-                `;
-                configurarEventosLinha(linha);
-
-                if (ordem === "receitas" && t.tipo !== "RECEITA") {
-                    linha.style.display = "none";
-                } else if (ordem === "despesas" && t.tipo !== "DESPESA") {
-                    linha.style.display = "none";
-                }
-            });
-
-            atualizarResumo();
-        })
-        .catch(erro => console.error("Erro ao listar dados ordenados:", erro));
-};
 
 const opcoesFiltroOriginais = `
     <option value="" disabled selected>Filtrar por...</option>
