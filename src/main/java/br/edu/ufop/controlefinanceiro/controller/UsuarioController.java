@@ -1,18 +1,19 @@
 package br.edu.ufop.controlefinanceiro.controller;
 
-import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioCadastroRequest;
-import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioLoginRequest;
-import br.edu.ufop.controlefinanceiro.controller.dto.UsuarioResponse;
+import br.edu.ufop.controlefinanceiro.controller.dto.*;
 import br.edu.ufop.controlefinanceiro.domain.Usuario;
+import br.edu.ufop.controlefinanceiro.security.TokenDenyListService;
+import br.edu.ufop.controlefinanceiro.security.TokenService;
 import br.edu.ufop.controlefinanceiro.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -20,32 +21,41 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final TokenService tokenService;
+    private final TokenDenyListService tokenDenyListService;
 
     @PostMapping("/cadastro")
-    public ResponseEntity<String> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request) {
-        usuarioService.cadastrarUsuario(
-                request.getNome(),
-                request.getIdentificadorLogin(),
-                request.getSenhaPura(),
-                request.getConfirmacaoSenha()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário cadastrado com sucesso!");
+    public ResponseEntity<UsuarioResponse> cadastrar(@Valid @RequestBody CadastroRequest request) {
+        UsuarioResponse response = usuarioService.cadastrar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody UsuarioLoginRequest request) {
-        Usuario usuarioLogado = usuarioService.autenticarUsuario(
-                request.getIdentificadorLogin(),
-                request.getSenhaPura()
-        );
-
-        UsuarioResponse response = new UsuarioResponse(
-                usuarioLogado.getId(),
-                usuarioLogado.getIdentificadorLogin()
-        );
-
+    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody LoginRequest request) {
+        UsuarioResponse response = usuarioService.autenticar(request);
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/perfil")
+    public ResponseEntity<UsuarioResponse> editarPerfil(@Valid @RequestBody EditarPerfilRequest request, @AuthenticationPrincipal Usuario usuarioLogado) {
+    UsuarioResponse response = usuarioService.editarPerfil(request, usuarioLogado.getId());
+    return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/senha")
+    public ResponseEntity<UsuarioResponse> alterarSenha(@Valid @RequestBody AlterarSenhaRequest request, @AuthenticationPrincipal Usuario usuarioLogado) {
+        usuarioService.alterarSenha(request, usuarioLogado.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")){
+            String token = authHeader.substring(7);
+            Instant expiracao = tokenService.extrairDataExpiracao(token);
+            tokenDenyListService.revogarToken(token, expiracao);
+        }
+        return ResponseEntity.noContent().build();
+    }
 }

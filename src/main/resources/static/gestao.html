@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurum | Gestão</title>
+    <link rel="icon" type="image/png" href="img/aurum-favicon.png">
+    <link rel="stylesheet" href="css/gestao.css">
+</head>
+
+<body>
+
+<div id="modal-descricao" class="modal">
+    <div class="modal-content">
+        <h2>Descrição</h2>
+        <p id="texto-descricao"></p>
+        <div class="botoes">
+            <button id="fechar-descricao">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-transacao" class="modal">
+    <div class="modal-content">
+        <h2>Nova transação</h2>
+        <form id="form-transacao">
+            <div class="campo">
+                <label>Nome</label>
+                <input type="text" id="nome" placeholder="Digite o nome">
+            </div>
+            <div class="campo">
+                <label>Valor</label>
+                <input type="number" id="valor" step="0.01" placeholder="0,00">
+            </div>
+            <div class="campo">
+                <label>Tipo</label>
+                <select id="tipo">
+                    <option value="">Selecione</option>
+                    <option value="Receita">Receita</option>
+                    <option value="Despesa">Despesa</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label>Categoria</label>
+                <select id="categoria">
+                    <option value="">Selecione</option>
+                    <option value="nova">+ Adicionar nova categoria</option>
+                </select>
+                <input
+                        type="text"
+                        id="nova-categoria"
+                        placeholder="Digite a nova categoria"
+                        style="display:none; margin-top:10px;">
+            </div>
+            <div class="campo">
+                <label>Data</label>
+                <div id="calendario-container" class="wrapper-calendario">
+                    <input type="text" id="data" placeholder="dd/mm/aaaa" data-input>
+                    <span class="material-symbols-outlined icone-calendario" data-toggle>calendar_month</span>
+                </div>
+                <span id="erro-data-limite" style="color: #ff3b3b; font-size: 12px; display: none; margin-top: 5px; font-weight: 500;">
+                    Não é permitido lançar transações com mais de 5 anos de diferença!
+                </span>
+            </div>
+            <div class="campo">
+                <label>Descrição</label>
+                <textarea id="descricao" rows="3"></textarea>
+            </div>
+            <div class="botoes">
+                <button type="button" id="cancelar">Cancelar</button>
+                <button type="submit">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modal-excluir" class="modal">
+    <div class="modal-content">
+        <h2>Excluir Transação</h2>
+        <p>Tem certeza que deseja excluir esta transação?</p>
+        <div class="botoes">
+            <button type="button" id="nao-excluir">
+                Não
+            </button>
+            <button type="button" id="sim-excluir">
+                Sim
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-dashboard" class="modal">
+    <div class="modal-dashboard-content">
+        <div class="cabecalho-dash">
+            <h2>Dashboard Financeiro</h2>
+            <div class="dash-filtros">
+                <button class="btn-filtro ativo" data-periodo="todos">Todo período</button>
+                <button class="btn-filtro" data-periodo="ano">Este ano</button>
+                <button class="btn-filtro" data-periodo="mes">Este mês</button>
+                <button class="btn-filtro" data-periodo="30d">Últimos 30 dias</button>
+                <button class="btn-filtro" data-periodo="7d">Últimos 7 dias</button>
+                <button class="btn-filtro" data-periodo="hoje">Hoje</button>
+            </div>
+        </div>
+        <div class="dash-cards">
+            <div class="dash-card">
+                <span>Saldo Atual</span>
+                <h3 id="dash-saldo">R$ 0,00</h3>
+            </div>
+            <div class="dash-card">
+                <span>Total Receitas</span>
+                <h3 id="dash-receitas">R$ 0,00</h3>
+            </div>
+            <div class="dash-card">
+                <span>Total Despesas</span>
+                <h3 id="dash-despesas">R$ 0,00</h3>
+            </div>
+            <div class="dash-card">
+                <span>Transações</span>
+                <h3 id="dash-qtd">0</h3>
+            </div>
+        </div>
+        <div class="dash-charts">
+            <div class="dash-chart-container linha-chart">
+                <h4>Evolução do Saldo</h4>
+                <div class="chart-wrapper">
+                    <canvas id="chart-linha"></canvas>
+                </div>
+            </div>
+
+            <div class="dash-chart-container grid-2-col">
+                <div class="chart-box">
+                    <h4>Despesas por Categoria</h4>
+                    <div id="chart-pizza-vazio">Nenhuma despesa no período selecionado.</div>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-pizza"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h4>Receitas vs Despesas</h4>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-barra"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-categorias" class="modal">
+    <div class="modal-content modal-categorias-content">
+        <h2>Gerenciar Categorias</h2>
+        <div class="categoria-topo">
+            <input
+                    type="text"
+                    id="nova-categoria-gerenciar"
+                    placeholder="Nova categoria">
+
+            <button id="adicionar-categoria">
+                Adicionar
+            </button>
+        </div>
+        <div id="lista-categorias">
+        </div>
+        <div class="botoes">
+            <button id="fechar-categorias">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <header>
+        <div class="titulo-pagina">
+            <img
+                    src="img/aurum-logo.png"
+                    alt="Logo Aurum"
+                    draggable="false"
+            >
+        </div>
+        <div class="usuario-container">
+            <button class="usuario" id="usuario-btn">
+                <span id="usuario-nome">Olá</span>
+                ▼
+            </button>
+            <div class="menu-usuario" id="menu-usuario">
+                <button id="ver-perfil">
+                    <span class="material-symbols-outlined icone-menu">person</span>
+                    Ver perfil
+                </button>
+                <button id="trocar-tema">
+                    <span class="material-symbols-outlined icone-menu">dark_mode</span>
+                    Mudar tema
+                </button>
+                <button id="logout">
+                    <span class="material-symbols-outlined icone-menu">logout</span>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+    <section class="resumo-financeiro">
+        <div class="card">
+            <span>Saldo Atual</span>
+            <h2 id="saldo"></h2>
+        </div>
+        <div class="card">
+            <span>Receitas</span>
+            <h2 id="ganhos"></h2>
+        </div>
+        <div class="card">
+            <span>Despesas</span>
+            <h2 id="gastos"></h2>
+        </div>
+    </section>
+    <section class="acoes">
+        <div class="wrapper-botoes-acao">
+            <button id="abrir-modal">
+                <span class="material-symbols-outlined">add</span>
+                Nova Transação
+            </button>
+            <button id="abrir-categorias" class="btn-categorias">
+                <span class="material-symbols-outlined">settings</span>
+                Categorias
+            </button>
+            <div class="card-dash-preview" id="abrir-dashboard" title="Dashboard">
+                <div class="cdp-esquerda">
+                    <span class="material-symbols-outlined cdp-icone">monitoring</span>
+                    <div class="cdp-textos">
+                        <span class="cdp-titulo">Dashboard</span>
+                        <span class="cdp-subtitulo">Resumo financeiro</span>
+                    </div>
+                </div>
+                <div class="cdp-direita">
+                    <div class="mini-barra barra-1"></div>
+                    <div class="mini-barra barra-2"></div>
+                    <div class="mini-barra barra-3"></div>
+                    <div class="mini-barra barra-4"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="lista-transacoes">
+        <div class="cabecalho-transacoes">
+            <h2>Transações</h2>
+
+            <div class="wrapper-filtro-dropdown">
+                <span class="material-symbols-outlined">filter_list</span>
+                <select id="filtro-transacoes" onchange="aplicarFiltroTransacoes(this.value)">
+                    <option value="" disabled selected>Filtrar por...</option>
+                    <option value="todas">Todas</option>
+                    <option value="receitas">Receitas</option>
+                    <option value="despesas">Despesas</option>
+                    <option value="recentes">Mais recentes</option>
+                    <option value="antigas">Mais antigas</option>
+                    <option value="data_dec">Data mais atual</option>
+                    <option value="data_asc">Data mais antiga</option>
+                    <option value="maior_valor">Maior valor</option>
+                    <option value="menor_valor">Menor valor</option>
+                    <option value="categoria">Categoria ❯</option>
+                </select>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Data</th>
+                <th>Categoria</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody id="tabela-transacoes">
+            </tbody>
+        </table>
+    </section>
+</div>
+
+<div id="modal-confirmar-exclusao" class="modal">
+    <div class="modal-content modal-pequeno">
+        <h3 class="titulo-exclusao">Excluir Categoria</h3>
+        <p id="texto-exclusao-categoria" class="texto-confirmacao"></p>
+        <div id="area-transferencia-categoria" class="area-transferencia" style="display: none;">
+            <label for="select-transferir-categoria">Transferir transações antigas para:</label>
+            <select id="select-transferir-categoria" class="select-transferencia"></select>
+        </div>
+        <div class="botoes-confirmacao">
+            <button id="btn-cancelar-exclusao" class="btn-cancelar">Cancelar</button>
+            <button id="btn-confirmar-exclusao" class="btn-perigo">Confirmar Exclusão</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-confirmar-edicao" class="modal">
+    <div class="modal-content modal-pequeno">
+        <h3 class="titulo-sucesso">Atualizar Transações?</h3>
+        <p id="texto-edicao-categoria" class="texto-confirmacao"></p>
+        <div class="botoes-coluna">
+            <button id="btn-sim-atualizar-edicao" class="btn-sucesso">Sim, atualizar todas transações</button>
+            <button id="btn-nao-atualizar-edicao" class="btn-sucesso-outline">Não, alterar só a categoria</button>
+            <button id="btn-cancelar-edicao" class="btn-texto-perigo">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-perfil" class="modal">
+    <div class="modal-content modal-pequeno">
+        <div class="cabecalho-perfil">
+            <h3>Meu Perfil</h3>
+            <button id="fechar-perfil" class="btn-fechar"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="sessao-perfil">
+            <h4 class="subtitulo-perfil">Dados Pessoais</h4>
+            <div class="linha-dado-perfil" id="linha-nome-perfil">
+                <div class="info-dado">
+                    <span class="label-dado">Nome:</span>
+                    <span class="valor-dado" id="display-nome-perfil">Usuário</span>
+                </div>
+                <button class="btn-editar-perfil" title="Editar Nome">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+            </div>
+            <div class="linha-dado-perfil" id="linha-email-perfil">
+                <div class="info-dado">
+                    <span class="label-dado">Identificador:</span>
+                    <span class="valor-dado" id="display-email-perfil">identificador</span>
+                </div>
+                <button class="btn-editar-perfil" title="Editar Identificador">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+            </div>
+        </div>
+        <hr class="divisor-perfil">
+        <div class="sessao-perfil">
+            <h4 class="subtitulo-perfil">Segurança</h4>
+            <button id="btn-alterar-senha" class="btn-sucesso-outline" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span class="material-symbols-outlined" style="font-size: 20px;">lock</span>
+                Alterar Senha
+            </button>
+
+            <div id="container-senha" class="escondido">
+                <input type="password" id="senha-atual" class="input-perfil" placeholder="Senha Atual">
+                <input type="password" id="nova-senha" class="input-perfil" placeholder="Nova Senha (Mínimo 6 caracteres)">
+                <input type="password" id="confirmar-senha" class="input-perfil" placeholder="Confirmar Nova Senha">
+
+                <div class="botoes-container-senha">
+                    <button id="btn-salvar-senha" class="btn-sucesso">Salvar</button>
+                    <button id="btn-cancelar-senha" class="btn-sucesso">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
+<script src="js/tema.js"></script>
+<script src="js/gestao.js"></script>
+
+</body>
+
+</html>
