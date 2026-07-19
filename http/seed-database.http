@@ -1,0 +1,440 @@
+###
+POST http://localhost:8080/usuarios/cadastro
+Content-Type: application/json
+
+{
+  "nome": "teste",
+  "identificadorLogin": "teste",
+  "senhaPura": "123456",
+  "confirmacaoSenha": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.token);
+%}
+
+###
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "identificadorLogin": "teste",
+  "senhaPura": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.token);
+%}
+
+###
+POST http://localhost:8080/transacoes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "titulo": "Pão", "data": "2026-06-24", "valor": 20, "tipo": "DESPESA", "descricao": "pãozin", "categoriaNome": "Alimentação"}
+
+###
+POST http://localhost:8080/transacoes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "titulo": "Busão", "data": "2026-06-20", "valor": 16.50, "tipo": "DESPESA", "descricao": "", "categoriaNome": "Transporte"}
+
+###
+POST http://localhost:8080/transacoes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "titulo": "Salário Mensal", "data": "2026-07-01", "valor": 5000.00, "tipo": "RECEITA", "descricao": "Receita principal", "categoriaNome": "Salário"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Supermercado Semanal", "data": "2026-07-02", "valor": 450.50, "tipo": "DESPESA", "categoriaNome": "Alimentação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Freelance Design", "data": "2026-06-15", "valor": 1200.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Pagamento Aluguel", "data": "2026-07-05", "valor": 1500.00, "tipo": "DESPESA", "categoriaNome": "Moradia"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Combustível", "data": "2026-06-20", "valor": 200.00, "tipo": "DESPESA", "categoriaNome": "Transporte"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Conta de Luz", "data": "2026-07-08", "valor": 250.00, "tipo": "DESPESA", "categoriaNome": "Contas"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Venda de Livros", "data": "2026-07-09", "valor": 150.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Netflix", "data": "2026-07-10", "valor": 55.90, "tipo": "DESPESA", "categoriaNome": "Lazer"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Manutenção Notebook", "data": "2026-07-11", "valor": 300.00, "tipo": "DESPESA", "categoriaNome": "Serviços"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Aula de Inglês", "data": "2026-07-12", "valor": 400.00, "tipo": "DESPESA", "categoriaNome": "Educação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Bônus Projetos", "data": "2026-07-13", "valor": 800.00, "tipo": "RECEITA", "categoriaNome": "Salário"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Academia", "data": "2026-07-14", "valor": 120.00, "tipo": "DESPESA", "categoriaNome": "Saúde"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Restaurante", "data": "2026-07-15", "valor": 210.00, "tipo": "DESPESA", "categoriaNome": "Alimentação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Presente Aniversário", "data": "2026-06-28", "valor": 150.00, "tipo": "DESPESA", "categoriaNome": "Lazer"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Uber", "data": "2026-07-16", "valor": 35.00, "tipo": "DESPESA", "categoriaNome": "Transporte"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Compra de Teclado", "data": "2026-06-10", "valor": 450.00, "tipo": "DESPESA", "categoriaNome": "Equipamento"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Consultoria", "data": "2026-06-18", "valor": 600.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Remédio", "data": "2026-07-17", "valor": 80.00, "tipo": "DESPESA", "categoriaNome": "Saúde"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Cinema", "data": "2026-07-17", "valor": 60.00, "tipo": "DESPESA", "categoriaNome": "Lazer"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Doação", "data": "2026-07-16", "valor": 50.00, "tipo": "DESPESA", "categoriaNome": "Outros"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Venda de Software", "data": "2026-06-05", "valor": 1200.00, "tipo": "RECEITA", "categoriaNome": "Salário"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Gasolina", "data": "2026-07-02", "valor": 220.00, "tipo": "DESPESA", "categoriaNome": "Transporte"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Taxa Condomínio", "data": "2026-07-04", "valor": 700.00, "tipo": "DESPESA", "categoriaNome": "Moradia"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Curso Online", "data": "2026-06-12", "valor": 300.00, "tipo": "DESPESA", "categoriaNome": "Educação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Reembolso", "data": "2026-07-16", "valor": 100.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Café", "data": "2026-07-17", "valor": 12.00, "tipo": "DESPESA", "categoriaNome": "Alimentação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Manicure", "data": "2026-07-15", "valor": 60.00, "tipo": "DESPESA", "categoriaNome": "Saúde"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Mercado", "data": "2026-07-10", "valor": 320.00, "tipo": "DESPESA", "categoriaNome": "Alimentação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Manutenção", "data": "2026-06-25", "valor": 500.00, "tipo": "DESPESA", "categoriaNome": "Serviços"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Venda Itens Usados", "data": "2026-07-12", "valor": 250.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Ceia de Natal", "data": "2025-12-24", "valor": 850.00, "tipo": "DESPESA", "categoriaNome": "Alimentação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Bônus Fim de Ano", "data": "2025-12-20", "valor": 3500.00, "tipo": "RECEITA", "categoriaNome": "Salário"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "IPVA e Licenciamento", "data": "2026-01-10", "valor": 1800.00, "tipo": "DESPESA", "categoriaNome": "Transporte"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "IPTU Cota Única", "data": "2026-01-15", "valor": 1200.00, "tipo": "DESPESA", "categoriaNome": "Moradia"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Material Escolar", "data": "2026-02-05", "valor": 650.00, "tipo": "DESPESA", "categoriaNome": "Educação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Seguro de Vida Anual", "data": "2026-03-12", "valor": 450.00, "tipo": "DESPESA", "categoriaNome": "Contas"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Restituição Imposto", "data": "2026-03-25", "valor": 1100.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Revisão Carro", "data": "2026-04-10", "valor": 950.00, "tipo": "DESPESA", "categoriaNome": "Serviços"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Presente Dia das Mães", "data": "2026-05-08", "valor": 300.00, "tipo": "DESPESA", "categoriaNome": "Outros"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Assinatura Anual Software", "data": "2026-08-01", "valor": 599.90, "tipo": "DESPESA", "categoriaNome": "Equipamento"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Venda Carro Antigo", "data": "2026-09-15", "valor": 25000.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Viagem Feriado", "data": "2026-10-10", "valor": 1500.00, "tipo": "DESPESA", "categoriaNome": "Lazer"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Black Friday - Eletrônicos", "data": "2026-11-27", "valor": 2800.00, "tipo": "DESPESA", "categoriaNome": "Equipamento"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Primeira Parcela 13º", "data": "2026-11-30", "valor": 2500.00, "tipo": "RECEITA", "categoriaNome": "Salário"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Segunda Parcela 13º", "data": "2026-12-15", "valor": 2500.00, "tipo": "RECEITA", "categoriaNome": "Salário"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Matrícula Faculdade", "data": "2027-01-05", "valor": 1100.00, "tipo": "DESPESA", "categoriaNome": "Educação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Rendimento Investimentos", "data": "2027-01-10", "valor": 450.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Compra Primeiro Carro", "data": "2020-03-15", "valor": 15000.00, "tipo": "DESPESA", "categoriaNome": "Transporte"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Criptomoeda Fração", "data": "2026-05-18", "valor": 0.45, "tipo": "RECEITA", "categoriaNome": "Investimentos"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Ajuste Bancário", "data": "2026-06-01", "valor": 1.01, "tipo": "DESPESA", "categoriaNome": "Outros"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Pré-venda Jogo", "data": "2026-09-05", "valor": 350.00, "tipo": "DESPESA", "categoriaNome": "Lazer"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Resgate Tesouro Direto", "data": "2026-10-20", "valor": 5400.00, "tipo": "RECEITA", "categoriaNome": "Investimentos"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Revisão Dentista", "data": "2026-11-05", "valor": 280.00, "tipo": "DESPESA", "categoriaNome": "Saúde"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Presente Amigo Oculto", "data": "2026-12-10", "valor": 120.00, "tipo": "DESPESA", "categoriaNome": "Lazer"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Festas de Fim de Ano", "data": "2026-12-28", "valor": 1500.00, "tipo": "DESPESA", "categoriaNome": "Alimentação"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Renovação Domínio", "data": "2027-02-15", "valor": 80.00, "tipo": "DESPESA", "categoriaNome": "Serviços"}
+
+###
+POST http://localhost:8080/transacoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "titulo": "Freelance Consultoria AI", "data": "2027-03-10", "valor": 4500.00, "tipo": "RECEITA", "categoriaNome": "Extra"}
