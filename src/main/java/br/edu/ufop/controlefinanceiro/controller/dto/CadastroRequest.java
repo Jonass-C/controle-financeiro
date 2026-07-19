@@ -18,7 +18,7 @@ public class CadastroRequest {
     private String identificadorLogin;
 
     @NotBlank(message = "A senha é obrigatória.")
-    //@Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
+    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
     private String senhaPura;
 
     @NotBlank(message = "A confirmação de senha é obrigatória.")
