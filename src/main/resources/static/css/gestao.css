@@ -1465,6 +1465,7 @@ body.light #dash-despesas {
     --grafico-receita: #00C853;
     --grafico-receita-bg: rgba(0, 200, 83, 0.1);
     --grafico-despesa: #ff3b3b;
+    --grafico-despesa-bg: rgba(255, 59, 59, 0.1);
     --grafico-fonte: 'Poppins', sans-serif;
     --grafico-p1: #FF6384;
     --grafico-p2: #36A2EB;

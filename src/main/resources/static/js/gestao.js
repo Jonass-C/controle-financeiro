@@ -1089,7 +1089,7 @@ function configurarEdicaoPerfilBackend() {
                 const divSaudacao = document.getElementById("usuario-nome");
                 if (divSaudacao) divSaudacao.textContent = `Olá, ${primeiroNome}`;
 
-                alert("Perfil atualizado com sucesso!");
+                exibirMensagemModal("Perfil atualizado com sucesso!");
                 restaurarVisualizacaoPerfilOriginal();
             })
             .catch(erro => {
@@ -1338,6 +1338,7 @@ function atualizarDashboard() {
     const corReceita = estilos.getPropertyValue('--grafico-receita').trim();
     const corReceitaBg = estilos.getPropertyValue('--grafico-receita-bg').trim();
     const corDespesa = estilos.getPropertyValue('--grafico-despesa').trim();
+    const corDespesaBg = estilos.getPropertyValue('--grafico-despesa-bg').trim();
     const fonteGrafico = estilos.getPropertyValue('--grafico-fonte').trim();
 
     Chart.defaults.color = corTextos;
@@ -1351,13 +1352,38 @@ function atualizarDashboard() {
             datasets: [{
                 label: 'Saldo Acumulado (Período)',
                 data: Object.values(evolucaoDiaria),
-                borderColor: corReceita,
-                backgroundColor: corReceitaBg,
                 borderWidth: 3,
-                fill: true,
                 tension: 0.3,
-                pointBackgroundColor: corReceita,
-                pointRadius: 4
+                pointRadius: 4,
+                fill: {
+                    target: 'origin',
+                    above: corReceitaBg,
+                    below: corDespesaBg
+                },
+                borderColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea, scales} = chart;
+                    if (!chartArea || chartArea.bottom === chartArea.top) return corReceita;
+                    const eixoZero = scales.y.getPixelForValue(0);
+                    const alturaGrafico = chartArea.bottom - chartArea.top;
+                    let porcentagemZero = (eixoZero - chartArea.top) / alturaGrafico;
+                    if (isNaN(porcentagemZero)) porcentagemZero = 0;
+                    porcentagemZero = Math.max(0, Math.min(1, porcentagemZero));
+                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, corReceita);
+                    gradient.addColorStop(porcentagemZero, corReceita);
+                    gradient.addColorStop(porcentagemZero, corDespesa);
+                    gradient.addColorStop(1, corDespesa);
+                    return gradient;
+                },
+                pointBackgroundColor: function(context) {
+                    const valor = context.dataset.data[context.dataIndex];
+                    return valor < 0 ? corDespesa : corReceita;
+                },
+                pointBorderColor: function(context) {
+                    const valor = context.dataset.data[context.dataIndex];
+                    return valor < 0 ? corDespesa : corReceita;
+                }
             }]
         },
         options: {
